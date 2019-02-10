@@ -57,28 +57,28 @@ import spartan.player.RedPlayer;
  * @author Pantelis Ypsilanti 2962 , Odysseas Zagoras 2902 , Theodoros Mosxos 2980
  */
 public class Server extends JFrame implements Serializable {
-
-    private JPanel jPanel1;
+ // variables for the GUI interface
+    private JPanel jPanel1;     
     private JLabel jLabel1;
-    private BluePlayer bluePlayer;
-    private RedPlayer redPlayer;
-    private Board board = new Board();
-    private Tile sourceTile;
-    private Tile destinationTile;
-    private Pawn MovedPawn;
+    private BluePlayer bluePlayer;     // variable for the blue player      
+    private RedPlayer redPlayer;      //variable for the red player
+    private Board board = new Board();   // object for the bord of the game 
+    private Tile sourceTile;        // variable for the tile 
+    private Tile destinationTile; //variable for the destinationtile
+    private Pawn MovedPawn;     // variavle for the pawn 
     private int NumPanel;
-    private boolean Start;
-    private final Alliance alliance;
-    private JPanel StartPane;
-    private JPanel OpponentPane;
+    private boolean Start;        //variable for the start of the game 
+    private final Alliance alliance; //variable for the alliance of the palyer
+    private JPanel StartPane;                   
+    private JPanel OpponentPane;                               //variables for the GUI interface
     private JPanel MovePane;
-    ArrayList<TilePanel> tiles;
-    ArrayList<TilePanel> tilesred;
-    ArrayList<TilePanel> tilesoppent;
-    ArrayList<JLabel> moves;
-    private int min1 = 4, sec1 = 60;
-    private JLabel nith;
-    private JLabel min;
+    ArrayList<TilePanel> tiles;           //ArrayList for the tiles 
+    ArrayList<TilePanel> tilesred;       //Arraylist for the tilew of the red palyer 
+    ArrayList<TilePanel> tilesoppent;  //Arraylist for the tilew of the opponent palyer 
+    ArrayList<JLabel> moves;      //Arraylist  for the moves
+    private int min1 = 4, sec1 = 60;    
+    private JLabel nith;      
+    private JLabel min;                    //variablew for the time
     private JLabel sec;
     private JLabel message;
     private Move move;
@@ -88,25 +88,26 @@ public class Server extends JFrame implements Serializable {
     boolean timeIsUp = false;
     boolean EndGame = false;
     //  boolean PlayersTurn = true;
-    private boolean Winner = false;
+    private boolean Winner = false;           //variables that devlare the outcome of the game
     private boolean Draw = false;
     private JPanel scrollPane1;
     private JScrollPane scrol;
 
+    //variables that are used in order to create the connection between Client-Server
     private ObjectInputStream in;
     private ObjectOutputStream out;
     private DataInputStream indata;
     private DataOutputStream outdata;
-    private ServerSocket server;
+    private ServerSocket server;              
     private Socket connection;
     private static MainMenu main;
     private Load load;
     private Server ser;
 
-    public Server(MainMenu m, int port) throws IOException {
+    public Server(MainMenu m, int port) throws IOException {  //constractor of the class 
         initComponents();
         main = m;
-        server = new ServerSocket(port);
+        server = new ServerSocket(port);             //Initiallizing the connection from the Server , in order for the Client to connect with the Server
         server.setSoTimeout(60000);
         connection = server.accept();
         main.setVisible(false);
@@ -114,14 +115,17 @@ public class Server extends JFrame implements Serializable {
         in = new ObjectInputStream(connection.getInputStream());
         outdata = new DataOutputStream(connection.getOutputStream());
         indata = new DataInputStream(connection.getInputStream());
-        this.alliance = Alliance.RED;
-        setTitle("Spartan");
-        Start = true;
-        sourceTile = null;
-        destinationTile = null;
+        this.alliance = Alliance.RED;          //declaration of the server alliance
+        setTitle("Spartan");   // Title of the game
+        Start = true;                //intiallization for the begining of the game 
+        sourceTile = null;                           
+        destinationTile = null;         //Setting the tiles,pawns and coordinates into null at the beginning of trhe game
         MovedPawn = null;
-        bluePlayer = board.getBluePlayer();
-        redPlayer = board.getRedPlayer();
+        bluePlayer = board.getBluePlayer();           // getting the board for the  blue palyer
+        redPlayer = board.getRedPlayer();            // getting the board for the red  palyer
+        
+        //Setting the view and sizes of the GUI components of the interface
+        
         Image logo = new ImageIcon(getClass().getResource("/spartan/Images/logo.png")).getImage();
         setAlwaysOnTop(true);
         setResizable(false);
@@ -140,7 +144,9 @@ public class Server extends JFrame implements Serializable {
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         jPanel1.setLayout(new GridLayout(10, 10));
         jPanel1.setBackground(new Color(0, 0, 0, 0));
-        tiles = new ArrayList<>();
+        tiles = new ArrayList<>();     //Arraylist for the tiles of the game 
+        
+        //declaring the coordianates of the panel that the pawns can not be placed on 
         for (int i = 0; i < 10; i++) {
             for (int j = 0; j < 10; j++) {
                 if (i * 10 + j == 42 || i * 10 + j == 43 || i * 10 + j == 46 || i * 10 + j == 47 || i * 10 + j == 52 || i * 10 + j == 53 || i * 10 + j == 56 || i * 10 + j == 57) {
@@ -158,14 +164,15 @@ public class Server extends JFrame implements Serializable {
             }
         }
         jPanel1.revalidate();
-        jPanel1.repaint();
-        setLocation(-3, 0);
+        jPanel1.repaint();           
+        setLocation(-3, 0);                //preaparing the panel
         StartPane = new JPanel();
         if (!alliance.isBlue()) {
-            StartPane.setBackground(new Color(204, 0, 0, 255));
+            StartPane.setBackground(new Color(204, 0, 0, 255));       //declaring the colour ,according to the players choice
         } else {
             StartPane.setBackground(new Color(0, 0, 204, 255));
         }
+         //Setting the components  of the GUI ,of the interface
         StartPane.setVisible(true);
         StartPane.setSize((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 2, (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 3);
         StartPane.setLocation((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 2 + 1, 0);
@@ -173,10 +180,10 @@ public class Server extends JFrame implements Serializable {
         JButton start = new JButton("Start");
         start.setEnabled(false);
         start.setPreferredSize(new Dimension(80, 80));
-        tilesred = new ArrayList<>();
+        tilesred = new ArrayList<>();   // ArrayList of the tiles of the red player
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 10; j++) {
-                if (!alliance.isBlue()) {
+                if (!alliance.isBlue()) {            //creating the coordinates for the pawns of the red player 
                     tilesred.add(new TilePanel(i * 10 + j, this.redPlayer.getPawnOfStack(i * 10 + j), 1));
                     this.redPlayer.setCordinateofPawn(i * 10 + j, (i * 10 + j + 1) * (-1), 1, !isClicked);
                     tilesred.get(i * 10 + j).setLayout(new BorderLayout());
@@ -184,7 +191,7 @@ public class Server extends JFrame implements Serializable {
                     this.redPlayer.getPawnOfStack(i * 10 + j).setSide(true);
                     tilesred.get(i * 10 + j).add(new JLabel(this.redPlayer.getPawnOfStack(i * 10 + j).getImage()));
                     tilesred.get(i * 10 + j).setBackground(new Color(0, 0, 0, 0));
-                } else {
+                } else {      //creating the coordinates for the pawns of the blue player 
                     tilesred.add(new TilePanel(i * 10 + j, this.bluePlayer.getPawnOfStack(i * 10 + j), 1));
                     this.bluePlayer.setCordinateofPawn(i * 10 + j, (i * 10 + j + 1) * (-1), 1, !isClicked);
                     tilesred.get(i * 10 + j).setLayout(new BorderLayout());
@@ -197,6 +204,7 @@ public class Server extends JFrame implements Serializable {
                 StartPane.add(tilesred.get(i * 10 + j));
             }
         }
+        //Setting the componets of the GUI ,acoording to the palyer ,red or blue
         start.setEnabled(true);
         OpponentPane = new JPanel();
         if (!alliance.isBlue()) {
@@ -205,6 +213,7 @@ public class Server extends JFrame implements Serializable {
             OpponentPane.setBackground(new Color(204, 0, 0, 255));
         }
 
+        //Setting the sizes of the componets of the interface
         OpponentPane.setVisible(true);
         OpponentPane.setSize((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 2, (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 3);
         OpponentPane.setLocation((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 2 + 1, (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 3);
@@ -225,15 +234,16 @@ public class Server extends JFrame implements Serializable {
         OptionPane.setSize((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 4, (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 3);
         OptionPane.setLocation((int) ((Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 2 + (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 4 + 1), (int) ((Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 3) * 2);
 
+        // Declaring the componets of the buttons of the interface
         ImageIcon button = new ImageIcon(Toolkit.getDefaultToolkit().getClass().getResource("/spartan/Images/randombutton.png"));
         Image button1 = button.getImage().getScaledInstance((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 4, (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 12, Image.SCALE_SMOOTH);
 
-        JButton random = new JButton("Random");
+        JButton random = new JButton("Random");      //the random button 
         random.setIcon(new ImageIcon(button1));
         random.setPreferredSize(new Dimension((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 5, (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 15));
         random.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void actionPerformed(ActionEvent e) {      //Action listener for the button 
                 if (!isClicked || timeIsUp) {
                     return;
                 }
@@ -245,7 +255,7 @@ public class Server extends JFrame implements Serializable {
             }
         });
 
-        JButton exit = new JButton("Exit");
+        JButton exit = new JButton("Exit");     //the exit button    
 
         ImageIcon button4 = new ImageIcon(Toolkit.getDefaultToolkit().getClass().getResource("/spartan/Images/exitbutton.png"));
         Image button5 = button4.getImage().getScaledInstance((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 4, (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 12, Image.SCALE_SMOOTH);
@@ -253,7 +263,7 @@ public class Server extends JFrame implements Serializable {
         exit.setPreferredSize(new Dimension((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 5, (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 15));
         exit.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void actionPerformed(ActionEvent e) {    //Action listener for the button 
                 try {
                     Close();
                 } catch (Exception ex) {
@@ -265,7 +275,7 @@ public class Server extends JFrame implements Serializable {
             }
         });
 
-        JButton help = new JButton("Help");
+        JButton help = new JButton("Help");    //the help button 
 
         ImageIcon button6 = new ImageIcon(Toolkit.getDefaultToolkit().getClass().getResource("/spartan/Images/helpbutton.png"));
         Image button7 = button6.getImage().getScaledInstance((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 4, (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 12, Image.SCALE_SMOOTH);
@@ -273,7 +283,9 @@ public class Server extends JFrame implements Serializable {
         help.setPreferredSize(new Dimension((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 5, (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 15));
         help.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void actionPerformed(ActionEvent e) {          //Action listener for the button 
+                
+                //   getting the board and coordinates for the blue player pawns 
                 if ((board.getCurrentPlayer().getAlliance().isBlue() == alliance.isBlue()) && !Start) {
                     Move move = board.getCurrentPlayer().BotMove(board.getGameBoard());
                     tiles.get(move.getCurrentCoordinate()).setBackground(new Color(255, 0, 0, 50));
@@ -287,21 +299,23 @@ public class Server extends JFrame implements Serializable {
                     }
                     jPanel1.validate();
                     jPanel1.repaint();
-                    updateComponentTreeUI(getThisJFrame());
+                    updateComponentTreeUI(getThisJFrame());      //updating the board
 
                 }
             }
         });
+        //declaring componets of the GUI
         scrollPane1 = new JPanel();
         scrollPane1.setLocation((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 2, (int) ((Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 3) * 2 + (int) ((Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 10));
         scrollPane1.setBackground(Color.yellow);
         scrollPane1.setSize((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 4, (int) ((Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 3) * 2 + (int) ((Toolkit.getDefaultToolkit().getScreenSize().getHeight())));
         // scrollPane1.setLayout();
-        moves = new ArrayList<>();
+        moves = new ArrayList<>();       //ArraList for the moves 
         OptionPane.add(random);
         OptionPane.add(help);
         OptionPane.add(exit);
 
+        //declaring the components of time between the moves of the players and the veiew of the moves and turns of every player
         MovePane = new JPanel();
         MovePane.setBackground(Color.DARK_GRAY);
         MovePane.setVisible(true);
@@ -338,10 +352,10 @@ public class Server extends JFrame implements Serializable {
         message.setForeground(Color.WHITE);
 
         //      MovePane.add(scroll);
-        start.addActionListener(new ActionListener() {
+        start.addActionListener(new ActionListener() {      
 
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void actionPerformed(ActionEvent e) {     //Action listener for the start of the game 
                 if (!isClicked) {
                     start.setEnabled(false);
                     try {
@@ -354,12 +368,12 @@ public class Server extends JFrame implements Serializable {
                     } catch (IOException ex) {
                         Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                    start.setText("Ready");
+                    start.setText("Ready");       // ready button 
                     timer = new Timer(1000, new ActionListener() {
                         @Override
-                        public void actionPerformed(ActionEvent e) {
+                        public void actionPerformed(ActionEvent e) {    
                             if (board.boardFull(alliance)) {
-                                start.setEnabled(true);
+                                start.setEnabled(true);               //declaring the beginning of the game
                                 start.setBackground(Color.green);
 
                             } else {
@@ -367,7 +381,7 @@ public class Server extends JFrame implements Serializable {
                             }
                             sec.setForeground(Color.WHITE);
                             min.setForeground(Color.WHITE);
-                            nith.setForeground(Color.WHITE);
+                            nith.setForeground(Color.WHITE);           //cpmponents of GUI of time
                             message.setForeground(Color.WHITE);
                             if (sec1 == 0) {
                                 sec1 = 60;
@@ -375,12 +389,13 @@ public class Server extends JFrame implements Serializable {
 
                             }
 
-                            if (min1 < 0) {
+                            if (min1 < 0) {    //Declaration of the game according to the time  restrictions
                                 //TODO more
                                 // timeIsUp = true;
                                 if (!board.boardFull(alliance) && Start) {
                                     try {
-                                        Random(alliance);
+                                        Random(alliance);                //if the player has not placed all the pawns until the time
+                                                                        //is over ,the rest of the pawns are placed automatically in random order
                                     } catch (IOException ex) {
                                         Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
                                     }
@@ -397,7 +412,7 @@ public class Server extends JFrame implements Serializable {
                                     }
                                     timeIsUp = true;
                                     min1 = 1;
-                                    sec1 = 60;
+                                    sec1 = 60;                                        
                                     min.setText("0" + (min1 + 1));
                                     sec.setText("0" + (sec1 - 60));
                                     message.setText("Your Turn =>");
@@ -405,22 +420,22 @@ public class Server extends JFrame implements Serializable {
                                     Start = false;
 
                                     timer.start();
-                                    GamePlay();
+                                    GamePlay();              //palying the  game 
                                 } else {
-                                    EndGame = true;
+                                    EndGame = true;             //when the game will be over 
                                     //MovePane.setVisible(false);
                                     timer.stop();
-                                    if (board.getCurrentPlayer().getAlliance().isBlue() == alliance.isBlue()) {
+                                    if (board.getCurrentPlayer().getAlliance().isBlue() == alliance.isBlue()) {  //if your timeis up you lose the game automatically
                                         JOptionPane.showMessageDialog(getThisJFrame(), "You Lose.... Time is up", "END GAME", JOptionPane.INFORMATION_MESSAGE);
                                         updateComponentTreeUI(getThisJFrame());
 
-                                    } else {
+                                    } else {     //in caser one of the palyers is the winner 
                                         JOptionPane.showMessageDialog(getThisJFrame(), "You Win!! Time is up for the opponent.", "END GAME", JOptionPane.INFORMATION_MESSAGE);
                                         updateComponentTreeUI(getThisJFrame());
 
                                     }
                                 }
-                            } else {
+                            } else {  //   exchange of data bewteen the players 
                                 if (!Start) {
                                     if (board.getCurrentPlayer().getAlliance().isBlue() == alliance.isBlue()) {
                                         try {
@@ -450,7 +465,7 @@ public class Server extends JFrame implements Serializable {
                                 if (min1 < 10) {
                                     min.setText("0" + min1);
                                     if (sec1 < 10) {
-                                        sec.setText("0" + sec1);
+                                        sec.setText("0" + sec1);           //setting time componets  
                                     } else {
                                         sec.setText("" + sec1);
                                     }
@@ -477,13 +492,13 @@ public class Server extends JFrame implements Serializable {
                     min1 = 1;
                     sec1 = 60;
                     min.setText("0" + (min1 + 1));
-                    sec.setText("0" + (sec1 - 60));
+                    sec.setText("0" + (sec1 - 60));                        //setting time componets  
                     message.setText("Your Turn =>");
                     MovePane.remove(start);
                     Start = false;
 
                     timer.start();
-                    GamePlay();
+                    GamePlay();                      //game process
 
                 }
             }
@@ -495,32 +510,32 @@ public class Server extends JFrame implements Serializable {
         add(scrollPane1);
     }
 
-    private void Random(Alliance a) throws IOException {
-        ArrayList<Pawn> rand = new ArrayList<>();
+    private void Random(Alliance a) throws IOException {  //method that sets the pawns of the player in random order ,on the board 
+        ArrayList<Pawn> rand = new ArrayList<>();  //Arraylist of the random order of pawns 
         int min, max;
         if (!a.isBlue()) {
-            rand = redPlayer.Random();
+            rand = redPlayer.Random();    //random orde for the red player 
             min = 60;
             max = 100;
             StartPane.removeAll();
             for (int i = 0; i < 40; i++) {
-                tilesred.set(i, new TilePanel(i, null, 1));
+                tilesred.set(i, new TilePanel(i, null, 1));     //settring the ramdon ordered pawns ,in specific palces on the board
             }
             for (final TilePanel boardTile : tilesred) {
                 StartPane.add(boardTile);
             }
             StartPane.validate();
-            StartPane.repaint();
+            StartPane.repaint();            //updating the board
             StartPane.updateUI();
         } else {
             try {
-                rand = (ArrayList<Pawn>) in.readObject();
+                rand = (ArrayList<Pawn>) in.readObject();     
 
                 for (Pawn pawn : rand) {
                     pawn.setSide(false);
-                }
+                }                                    
                 bluePlayer.setStack(rand);
-                for (Pawn pawn : rand) {
+                for (Pawn pawn : rand) {                 //Setting the pawns in their board position 
                     this.board.setPawnOnBoard(pawn.getPositionOfPawn(), pawn);
                 }
             } catch (ClassNotFoundException ex) {
@@ -531,7 +546,7 @@ public class Server extends JFrame implements Serializable {
         }
 
         jPanel1.removeAll();
-        for (int i = min; i < max; i++) {
+        for (int i = min; i < max; i++) {            //calculations in order o place the pawns in specific palces on the board 
             tiles.remove(rand.get(i - min).getPositionOfPawn());
             tiles.add(rand.get(i - min).getPositionOfPawn(), new TilePanel(rand.get(i - min).getPositionOfPawn(), rand.get(i - min), 0));
             tiles.get(rand.get(i - min).getPositionOfPawn()).add(new JLabel(rand.get(i - min).getImage()));
@@ -540,22 +555,25 @@ public class Server extends JFrame implements Serializable {
             jPanel1.add(boardTile);
         }
         jPanel1.validate();
-        jPanel1.repaint();
+        jPanel1.repaint();                     //Updating the board
         jPanel1.updateUI();
         updateComponentTreeUI(getThisJFrame());
     }
 
-    private Runnable waitfor() throws InterruptedException {
+    private Runnable waitfor() throws InterruptedException { //a runnable method that creates a time thread 
         Thread.sleep((long) 5000);
         return null;
     }
 
+    //a method that declares the moves of the opponent 
     private void OpponentMove() throws IOException, ClassNotFoundException, InterruptedException {
         // board.changeCurrentPlayer();
-        GamePlay();
+        GamePlay();      
+        //declaring the way that the oppponent player will react 
+        
         final Move move = (Move) in.readObject();
         final MoveTransition transition = board.getCurrentPlayer().makeMove(move);
-        board = transition.getToBoard();
+        board = transition.getToBoard();                                  
         TilePanel temp = tiles.get(move.getDestinationCoordinate());
         if (temp.getPawn() == null) {
             tiles.remove(move.getDestinationCoordinate());
@@ -576,13 +594,13 @@ public class Server extends JFrame implements Serializable {
                 for (final TilePanel boardTile : tilesoppent) {
                     if (boardTile.getPos() == k) {
                         OpponentPane.add(boardTile);
-                    } else {
+                    } else {                                
                         boardTile.drawTile();
                         OpponentPane.add(boardTile);
                     }
 
                 }
-                OpponentPane.validate();
+                OpponentPane.validate();                   //Updating the board 
                 OpponentPane.updateUI();
                 updateComponentTreeUI(getThisJFrame());
 
@@ -590,18 +608,18 @@ public class Server extends JFrame implements Serializable {
                 int i = temp.getPawn().getTablePos();
 
                 tilesred.set(i, new TilePanel(i, temp.getPawn(), 1));
-                tilesred.get(i).add(new JLabel(temp.getPawn().getImage()));
+                tilesred.get(i).add(new JLabel(temp.getPawn().getImage()));        //setting and getting the red pawns 
                 for (final TilePanel boardTile : tilesred) {
                     if (boardTile.getPos() == i) {
                         temp.getPawn().setCordinateOfPawn(-1);
                         StartPane.add(boardTile);
                     } else {
                         boardTile.drawTile();
-                    }
+                    }                                       //declaring the componets of the interface
                     StartPane.add(boardTile);
                 }
                 StartPane.validate();
-                StartPane.updateUI();
+                StartPane.updateUI();                     //updating the board
                 updateComponentTreeUI(getThisJFrame());
 
             } else if (winner == move.getPawn()) {
@@ -610,19 +628,19 @@ public class Server extends JFrame implements Serializable {
                 board.getCurrentPlayer().getOpponent().DeletePawn(temp.getPawn());
                 StartPane.removeAll();
                 int i = temp.getPawn().getTablePos();
-                tilesred.set(i, new TilePanel(i, temp.getPawn(), 1));
+                tilesred.set(i, new TilePanel(i, temp.getPawn(), 1));               //setting and getting the red pawns 
                 tilesred.get(i).add(new JLabel(temp.getPawn().getImage()));
                 for (final TilePanel boardTile : tilesred) {
                     if (boardTile.getPos() == i) {
                         temp.getPawn().setCordinateOfPawn(-1);
                         StartPane.add(boardTile);
-                    } else {
+                    } else {                                                 //declaring the componets of the interface
                         boardTile.drawTile();
                         StartPane.add(boardTile);
                     }
                 }
                 StartPane.validate();
-                StartPane.updateUI();
+                StartPane.updateUI();                                      //updating the board
                 updateComponentTreeUI(getThisJFrame());
 
             } else {
@@ -644,18 +662,18 @@ public class Server extends JFrame implements Serializable {
                     }
                 }
                 OpponentPane.validate();
-                OpponentPane.updateUI();
+                OpponentPane.updateUI();                             //updating the board
                 updateComponentTreeUI(getThisJFrame());
 
             }
             if (temp.getPawn().getValue() == -1) {
-                EndGame = true;
+                EndGame = true;                       //end of the game 
                 Winner = false;
 
             }
         }
 
-        SwingUtilities.invokeLater(new Runnable() {
+        SwingUtilities.invokeLater(new Runnable() {     //method that interact with the Client-Server communication 
             @Override
             public void run() {
                 try {
@@ -668,15 +686,18 @@ public class Server extends JFrame implements Serializable {
                     Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 board.toStringBoard();
-                board.changeCurrentPlayer();
+                board.changeCurrentPlayer();       //swap between palyers turns 
                 GamePlay();
 
             }
         });
     }
 
+    //method that is in charfe of updating the move transitions between the players ,in every turn 
     private void drawBoard(int a, int b, int numPanel, boolean swap) throws InterruptedException, IOException, ClassNotFoundException {
 
+        
+        //declaring the componets of the interface  for the moves 
         if (!Start) {
             scrollPane1.removeAll();
             if ((board.getCurrentPlayer().getAlliance().isBlue() == alliance.isBlue())) {
@@ -704,31 +725,31 @@ public class Server extends JFrame implements Serializable {
                 scrollPane1.add(temp);
             }
             scrollPane1.validate();
-            scrollPane1.repaint();
+            scrollPane1.repaint();               //updating the panel 
             scrollPane1.updateUI();
             updateComponentTreeUI(this);
 
         }
         if (numPanel == 1) {
             StartPane.remove(a);
-            StartPane.add(new TilePanel(a, null, 1), a);
+            StartPane.add(new TilePanel(a, null, 1), a);          //setting the pawns on panel 
             tilesred.set(a, new TilePanel(a, null, 1));
             StartPane.validate();
-            StartPane.repaint();
-            StartPane.updateUI();
+            StartPane.repaint();                          //updating the panel 
+            StartPane.updateUI();              
         } else {
             if (!swap) {
                 tiles.set(a, new TilePanel(a, null, 0));
-                board.setPawnOnBoard(a, null);
+                board.setPawnOnBoard(a, null);                    //setting the pawns on panel 
                 if(tiles.get(b).getPawn() == null){
-                    System.out.println("mpika gia null");
+                    //System.out.println("mpika gia null");
                     board.setPawnOnBoard(b, null);
                 }
             } else {
                 board.toStringBoard();
             }
         }
-        jPanel1.removeAll();
+        jPanel1.removeAll();     //removes the pawns 
         for (final TilePanel boardTile : tiles) {
             if (!swap) {
                 if (boardTile.getPos() == b || boardTile.getPos() == a) {
@@ -738,7 +759,7 @@ public class Server extends JFrame implements Serializable {
                             boardTile.getTile().getPawn().setCordinateOfPawn(b);
                             board.setPawnOnBoard(b, boardTile.getPawn());
 
-                        } else {
+                        } else {                                                         //declaring componets of the position and the board 
                             boardTile.getTile().getPawn().setCordinateOfPawn(a);
                             board.setPawnOnBoard(a, boardTile.getPawn());
                         }
@@ -748,14 +769,14 @@ public class Server extends JFrame implements Serializable {
                 }
                 jPanel1.add(boardTile);
                 jPanel1.validate();
-                jPanel1.updateUI();
+                jPanel1.updateUI();                      //updating the board
                 updateComponentTreeUI(this);
             } else {
                 if (boardTile.getPos() == b || boardTile.getPos() == a) {
                     if (boardTile.getPawn() != null) {
                         boardTile.add(new JLabel(boardTile.getPawn().getImage()));
                         if (boardTile.getPos() == b) {
-                            boardTile.getTile().getPawn().setCordinateOfPawn(b);
+                            boardTile.getTile().getPawn().setCordinateOfPawn(b);      //declaring componets of the position and the board 
                             board.setPawnOnBoard(b, boardTile.getPawn());
 
                         } else {
@@ -769,11 +790,11 @@ public class Server extends JFrame implements Serializable {
                 jPanel1.add(boardTile);
             }
         }
-        jPanel1.validate();
+        jPanel1.validate();               //updating the board
         jPanel1.updateUI();
         updateComponentTreeUI(this);
 
-        if (!Start) {
+        if (!Start) {         //declaring colour components 
             GamePlay();
             if (board.getCurrentPlayer().getAlliance().isBlue()) {
                 tiles.get(a).setBackground(new Color(0, 255, 0, 50));
@@ -786,22 +807,22 @@ public class Server extends JFrame implements Serializable {
         }
     }
 
-    private JFrame getThisJFrame() {
+    private JFrame getThisJFrame() {  //getter method for the JFrame 
         return this;
     }
 
-    private void setCurrentMove(Move move) {
+    private void setCurrentMove(Move move) {    //setter method for the current move 
         this.move = move;
     }
 
-    private void highlightStartTiles() {
-        if (alliance.isBlue()) {
+    private void highlightStartTiles() {      //method that highliths the pawns with a clour 
+        if (alliance.isBlue()) {     //for the blue player pawns 
             for (int i = 0; i < 40; i++) {
                 if (!board.getTile(i).isTileOccupied()) {
                     tiles.get(i).setBackground(new Color(0, 0, 204, 50));
                 }
             }
-        } else {
+        } else {      //for the red palyer pawns 
             for (int i = 60; i < 100; i++) {
                 if (!board.getTile(i).isTileOccupied()) {
                     tiles.get(i).setBackground(new Color(204, 0, 0, 50));
@@ -809,28 +830,28 @@ public class Server extends JFrame implements Serializable {
             }
         }
         jPanel1.validate();
-        jPanel1.updateUI();
+        jPanel1.updateUI();          //updating the board
         updateComponentTreeUI(this);
 
     }
 
-    private void drawStartPanel(int a, int b, final Pawn pawn, int p) {
+    private void drawStartPanel(int a, int b, final Pawn pawn, int p) { //method that declares the start panel of the palyers 
         if (p == 1) {
-            tilesred.set(a, new TilePanel(a, null, 1));
-            StartPane.remove(a);
+            tilesred.set(a, new TilePanel(a, null, 1)); 
+            StartPane.remove(a);                        //transition from the startt panel  
             StartPane.add(tilesred.get(a), a);
 
             StartPane.validate();
-            StartPane.repaint();
+            StartPane.repaint();                  //updating the board
             StartPane.updateUI();
         } else if (p == 0) {
             jPanel1.removeAll();
             tiles.set(a, new TilePanel(a, null, 0));
             for (final TilePanel boardTile : tiles) {
-                jPanel1.add(boardTile);
+                jPanel1.add(boardTile);                     //transition from the startt panel  to the board 
             }
             board.setPawnOnBoard(a, null);
-            jPanel1.validate();
+            jPanel1.validate();                  //updating the board
             jPanel1.updateUI();
             //    board.toStringBoard();
         }
@@ -838,7 +859,7 @@ public class Server extends JFrame implements Serializable {
         tilesred.set(b, new TilePanel(b, pawn, 1));
         tilesred.get(b).add(new JLabel(pawn.getImage()));
         for (final TilePanel boardTile : tilesred) {
-            if (boardTile.getPos() == b) {
+            if (boardTile.getPos() == b) {                               //declaration of the way the pawn will be placed on the board
                 this.redPlayer.setCordinateofPawn(a, (b + 1) * (-1), p, !isClicked);
                 StartPane.add(boardTile);
             } else {
@@ -847,27 +868,27 @@ public class Server extends JFrame implements Serializable {
             StartPane.add(boardTile);
         }
         StartPane.validate();
-        StartPane.updateUI();
+        StartPane.updateUI();        //updating the board
         updateComponentTreeUI(this);
     }
 
-    private void CheckEnd() {
-        if (!Start) {
+    private void CheckEnd() {    //method that declares the outcome at the end of the game 
+        if (!Start) {    // no start case 
             GamePlay();
             if (!(board.getCurrentPlayer().getAlliance().isBlue())) {
                 if (EndGame) {
                     //MovePane.setVisible(false);
                     timer.stop();
-                    if (Draw) {
+                    if (Draw) {                     //In case of draw 
                         JOptionPane.showMessageDialog(getThisJFrame(), "Draw", "END GAME", JOptionPane.INFORMATION_MESSAGE);
                         updateComponentTreeUI(getThisJFrame());
 
-                    } else {
-                        if (Winner) {
+                    } else {            
+                        if (Winner) {          //for the winner player 
                             JOptionPane.showMessageDialog(getThisJFrame(), "You Win", "END GAME", JOptionPane.INFORMATION_MESSAGE);
                             updateComponentTreeUI(getThisJFrame());
 
-                        } else {
+                        } else {        //for the loser player 
                             JOptionPane.showMessageDialog(getThisJFrame(), "You Lose", "END GAME", JOptionPane.INFORMATION_MESSAGE);
                             updateComponentTreeUI(getThisJFrame());
 
@@ -877,7 +898,7 @@ public class Server extends JFrame implements Serializable {
                 } else {
                     min1 = 1;
                     sec1 = 60;
-                    min.setText("0" + (min1 + 1));
+                    min.setText("0" + (min1 + 1));             //declearing time  
                     sec.setText("0" + (sec1 - 60));
                     message.setText("Opponent Turn => ");
 
@@ -892,16 +913,16 @@ public class Server extends JFrame implements Serializable {
                 if (EndGame) {
                     // MovePane.setVisible(false);
                     timer.stop();
-                    if (Draw) {
+                    if (Draw) {               //In case of draw 
                         JOptionPane.showMessageDialog(getThisJFrame(), "Draw", "END GAME", JOptionPane.INFORMATION_MESSAGE);
                         updateComponentTreeUI(getThisJFrame());
 
                     } else {
-                        if (Winner) {
+                        if (Winner) {             //for the winner player 
                             JOptionPane.showMessageDialog(getThisJFrame(), "You Win", "END GAME", JOptionPane.INFORMATION_MESSAGE);
                             updateComponentTreeUI(getThisJFrame());
 
-                        } else {
+                        } else {                       //for the loser player 
                             JOptionPane.showMessageDialog(getThisJFrame(), "You Lose", "END GAME", JOptionPane.INFORMATION_MESSAGE);
                             updateComponentTreeUI(getThisJFrame());
 
@@ -911,7 +932,7 @@ public class Server extends JFrame implements Serializable {
                 } else {
                     min1 = 1;
                     sec1 = 60;
-                    min.setText("0" + (min1 + 1));
+                    min.setText("0" + (min1 + 1));             //declearing time  
                     sec.setText("0" + (sec1 - 60));
                     message.setText("Your Turn => ");
                 }
@@ -919,13 +940,13 @@ public class Server extends JFrame implements Serializable {
         }
     }
 
-    private void GamePlay() {
+    private void GamePlay() { //method that declares the flow of the game 
         this.board.getCurrentPlayer().calculateLegalMoves(board);//.setLegalMoves(this.board.getCurrentPlayer().calculateLegalMoves(this.board.getCurrentPlayer().getActivePawns().getStack(), board));
         this.board.getCurrentPlayer().getOpponent().calculateLegalMoves(board);//.setLegalMoves(this.board.getCurrentPlayer().getOpponent().calculateLegalMoves(this.board.getCurrentPlayer().getOpponent().getActivePawns().getStack(), board));
         if (redPlayer.getAvailablePawns().isEmpty() && bluePlayer.getAvailablePawns().isEmpty()) {
             Draw = true;
             EndGame = true;
-        } else if (redPlayer.getAvailablePawns().isEmpty()) {
+        } else if (redPlayer.getAvailablePawns().isEmpty()) {  //in case that there are no more moves 
             EndGame = true;
             Winner = false;
         } else if (bluePlayer.getAvailablePawns().isEmpty()) {
@@ -971,7 +992,7 @@ public class Server extends JFrame implements Serializable {
         pack();
     }// </editor-fold>                        
 
-    public void Close() throws Exception {
+    public void Close() throws Exception {  //method that terminates the connection between the Client and the Server 
         if (isClicked) {
             timer.stop();
         }
@@ -981,7 +1002,7 @@ public class Server extends JFrame implements Serializable {
         connection.close();
     }
 
-    private Runnable test(int a, int b) {
+    private Runnable test(int a, int b) { //  method that checks the stability o f the moves  
         for (final TilePanel boardTile : tiles) {
             if (boardTile.getPos() == b || boardTile.getPos() == a) {
                 if (boardTile.getPawn() != null) {
@@ -998,26 +1019,26 @@ public class Server extends JFrame implements Serializable {
                 boardTile.drawTile();
             }
             jPanel1.add(boardTile);
-            jPanel1.validate();
+            jPanel1.validate();             //Updating the board 
             jPanel1.updateUI();
             updateComponentTreeUI(this);
         }
         return null;
     }
 
-    public class TilePanel extends JPanel {
+    public class TilePanel extends JPanel {    //method that corresponds the coordinates to the tiles of the panel 
 
-        private Tile tile;
+        private Tile tile;   //variable for tile 
 
-        public TilePanel(int pos, Pawn p, int numberOfPanel) {
+        public TilePanel(int pos, Pawn p, int numberOfPanel) {// constractor of the class 
             super();
             tile = new Tile(pos, p);
-            setBackground(new Color(0, 0, 0, 0));
+            setBackground(new Color(0, 0, 0, 0));     //setting componets of the interface 
             setLayout(new BorderLayout());
             this.setBorder(BorderFactory.createLineBorder(Color.GRAY));
             addMouseListener(new MouseListener() {
                 @Override
-                public void mouseClicked(final MouseEvent e) {
+                public void mouseClicked(final MouseEvent e) { //Action listener for button 
                     if (Start) {
                         if (!isClicked || timeIsUp) {
                             return;
@@ -1027,7 +1048,10 @@ public class Server extends JFrame implements Serializable {
                             return;
                         }
                     }
-                    if (numberOfPanel == 1) {
+                    
+                    //declaration of values and positions and the values of the tiles and pawns ,according to the tile 
+                    
+                    if (numberOfPanel == 1) {         
                         if (SwingUtilities.isRightMouseButton(e)) {
                             if (sourceTile != null) {
                                 getThis().unhighLighted(sourceTile.getTileCordinates(), NumPanel, MovedPawn);
@@ -1036,7 +1060,7 @@ public class Server extends JFrame implements Serializable {
                                 }
                             }
                             sourceTile = null;
-                            destinationTile = null;
+                            destinationTile = null;  //declaring values 
                             MovedPawn = null;
                             NumPanel = -1;
 
@@ -1063,7 +1087,7 @@ public class Server extends JFrame implements Serializable {
                                             public void run() {
                                                 drawStartPanel(sourceTile.getTileCordinates(), destinationTile.getTileCordinates(), MovedPawn, NumPanel);
                                                 sourceTile = null;
-                                                destinationTile = null;
+                                                destinationTile = null;    //declaring values
                                                 MovedPawn = null;
                                                 NumPanel = -1;
                                             }
@@ -1085,7 +1109,7 @@ public class Server extends JFrame implements Serializable {
 
                             }
                             sourceTile = null;
-                            destinationTile = null;
+                            destinationTile = null;    //declaring values
                             MovedPawn = null;
                             NumPanel = -1;
                         } else if (SwingUtilities.isLeftMouseButton(e)) {
@@ -1114,7 +1138,7 @@ public class Server extends JFrame implements Serializable {
                                                 tiles.get(move.getDestinationCoordinate()).setBackground(new Color(255, 255, 0, 50));
                                             }
                                         }
-                                        updateComponentTreeUI(getThisJFrame());
+                                        updateComponentTreeUI(getThisJFrame()); //updating the interface 
 
                                     }
                                 }
@@ -1139,7 +1163,7 @@ public class Server extends JFrame implements Serializable {
                                                         Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
                                                     }
                                                     sourceTile = null;
-                                                    destinationTile = null;
+                                                    destinationTile = null;    //declaring values
                                                     MovedPawn = null;
                                                     NumPanel = -1;
                                                 }
@@ -1168,7 +1192,7 @@ public class Server extends JFrame implements Serializable {
                                                 @Override
                                                 public void run() {
                                                     sourceTile = null;
-                                                    destinationTile = null;
+                                                    destinationTile = null;      //declaring values
                                                     MovedPawn = null;
                                                     NumPanel = -1;
                                                 }
@@ -1189,7 +1213,7 @@ public class Server extends JFrame implements Serializable {
                                             move.getPawn().setSide(true);
                                             temp.getPawn().setSide(true);
 
-                                            if (winner == null) {
+                                            if (winner == null) {    //in case of unknown winner 
                                                 tiles.remove(move.getDestinationCoordinate());
                                                 tiles.add(move.getDestinationCoordinate(), new TilePanel(move.getDestinationCoordinate(), null, 0));
                                                 board.getCurrentPlayer().getOpponent().DeletePawn(temp.getPawn());
@@ -1209,7 +1233,7 @@ public class Server extends JFrame implements Serializable {
                                                     }
                                                 }
                                                 OpponentPane.validate();
-                                                OpponentPane.updateUI();
+                                                OpponentPane.updateUI();                     //updating componets of the interface 
                                                 updateComponentTreeUI(getThisJFrame());
                                                 StartPane.removeAll();
                                                 int k = move.getPawn().getTablePos();
@@ -1226,7 +1250,7 @@ public class Server extends JFrame implements Serializable {
 
                                                 }
                                                 StartPane.validate();
-                                                StartPane.updateUI();
+                                                StartPane.updateUI();                          //updating componets of the interface 
                                                 updateComponentTreeUI(getThisJFrame());
 
                                             } else if (winner == move.getPawn()) {
@@ -1248,7 +1272,7 @@ public class Server extends JFrame implements Serializable {
 
                                                 }
                                                 OpponentPane.validate();
-                                                OpponentPane.updateUI();
+                                                OpponentPane.updateUI();                     //updating componets of the interface 
                                                 updateComponentTreeUI(getThisJFrame());
                                             } else {
                                                 tiles.remove(move.getDestinationCoordinate());
@@ -1256,7 +1280,7 @@ public class Server extends JFrame implements Serializable {
                                                 board.getCurrentPlayer().DeletePawn(move.getPawn());
                                                 StartPane.removeAll();
                                                 int k = move.getPawn().getTablePos();
-                                                tilesred.set(k, new TilePanel(k, move.getPawn(), 1));
+                                                tilesred.set(k, new TilePanel(k, move.getPawn(), 1));              //updating componets of the interface 
                                                 tilesred.get(k).add(new JLabel(move.getPawn().getImage()));
                                                 for (final TilePanel boardTile : tilesred) {
                                                     if (boardTile.getPos() == k) {
@@ -1269,13 +1293,13 @@ public class Server extends JFrame implements Serializable {
 
                                                 }
                                                 StartPane.validate();
-                                                StartPane.updateUI();
+                                                StartPane.updateUI();                            //updating board 
                                                 updateComponentTreeUI(getThisJFrame());
 
                                             }
                                             if (temp.getPawn().getValue() == -1) {
                                                 Winner = true;
-                                                EndGame = true;
+                                                EndGame = true;                            //end of the game 
                                                 //                         return;
                                             }
                                         }
@@ -1312,7 +1336,7 @@ public class Server extends JFrame implements Serializable {
                                                     Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
                                                 }
                                                 sourceTile = null;
-                                                destinationTile = null;
+                                                destinationTile = null;                 //declaring values 
                                                 MovedPawn = null;
                                                 NumPanel = -1;
                                                 //board.toStringBoard();
@@ -1327,7 +1351,7 @@ public class Server extends JFrame implements Serializable {
                         }
                     }
                 }
-
+                           //Action events 
                 @Override
                 public void mousePressed(MouseEvent me) {
                     return;
@@ -1352,31 +1376,33 @@ public class Server extends JFrame implements Serializable {
 
         }
 
-        public Tile getTile() {
+        public Tile getTile() {   // getter method for the tile 
             return this.tile;
         }
 
-        public int getPos() {
+        public int getPos() {        //getter method for the position 
             return this.tile.getTileCordinates();
         }
 
-        private TilePanel getThis() {
+        private TilePanel getThis() {     //getter method for the Tile panel 
             return this;
         }
 
-        public Pawn getPawn() {
+        public Pawn getPawn() {         //getter method for the pawn 
             return this.tile.getPawn();
         }
 
-        public void highLighted() {
+        public void highLighted() {        //method for the pawns that are highlighted 
             this.setBorder(BorderFactory.createLineBorder(Color.CYAN));
             this.setBackground(Color.CYAN);
             validate();
-            repaint();
+            repaint();            //updating board 
             updateUI();
         }
 
-        public void unhighLighted(int a, int p, Pawn pawn) {
+        public void unhighLighted(int a, int p, Pawn pawn) { // method for the pawns that are not higjlithed 
+           
+            //declaring components of interface 
             if (p == 1) {
                 StartPane.remove(a);
                 tilesred.set(a, new TilePanel(a, pawn, 1));
@@ -1386,7 +1412,7 @@ public class Server extends JFrame implements Serializable {
                 tilesred.get(a).setBackground(new Color(0, 0, 0, 0));
                 StartPane.add(tilesred.get(a), a);
                 StartPane.validate();
-                StartPane.repaint();
+                StartPane.repaint();               //updating board 
                 StartPane.updateUI();
             } else if (p == 0) {
                 jPanel1.remove(a);
@@ -1397,7 +1423,7 @@ public class Server extends JFrame implements Serializable {
                 tiles.get(a).setBackground(new Color(0, 0, 0, 0));
                 jPanel1.add(tiles.get(a), a);
                 jPanel1.validate();
-                jPanel1.repaint();
+                jPanel1.repaint();       //updating board 
                 jPanel1.updateUI();
                 /* jPanel1.removeAll();
                 tiles.set(a, new TilePanel(a, pawn, Start, 0));
@@ -1411,18 +1437,19 @@ public class Server extends JFrame implements Serializable {
             }
             validate();
             repaint();
-            updateUI();
+            updateUI();                                 //updating board 
             updateComponentTreeUI(getThisJFrame());
         }
 
-        void drawTile() {
+        void drawTile() {   //method that is in charge of the tiles  view 
+            // In case that the tile is  valid 
             if (!(getPos() == 42 || getPos() == 43 || getPos() == 46 || getPos() == 47
                     || getPos() == 52 || getPos() == 53 || getPos() == 56 || getPos() == 57)) {
                 setLayout(new BorderLayout());
                 setBorder(BorderFactory.createLineBorder(Color.GRAY));
                 setBackground(new Color(0, 0, 0, 0));
                 validate();
-            } else {
+            } else { // In case that the tile is not  valid 
                 setLayout(new BorderLayout());
                 setBorder(BorderFactory.createLineBorder(Color.GRAY));
                 setBackground(new Color(0, 0, 0, 50));
