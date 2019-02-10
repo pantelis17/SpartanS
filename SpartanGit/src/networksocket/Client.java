@@ -54,7 +54,8 @@ import spartan.player.MoveTransition;
 import spartan.player.RedPlayer;
 
 /**
- *
+ * This class contain the functions and the logic for the client on the game.
+ * 
  * @author Pantelis Ypsilanti 2962 , Odysseas Zagoras 2902 , Theodoros Mosxos 2980
  */
 public class Client extends JFrame implements Serializable {
@@ -70,12 +71,12 @@ public class Client extends JFrame implements Serializable {
     private int NumPanel;
     private boolean Start;
     private final Alliance alliance;
-    private JPanel StartPane;
-    private JPanel OpponentPane;
+    private JPanel StartPane;//player hand panel
+    private JPanel OpponentPane;//opponent graveyard panel
     private JPanel MovePane;
     ArrayList<TilePanel> tiles;
-    ArrayList<TilePanel> tilesblue;
-    ArrayList<TilePanel> tilesoppent;
+    ArrayList<TilePanel> tilesblue;//hand of the player
+    ArrayList<TilePanel> tilesoppent;//hand of the opponent
     ArrayList<JLabel> moves;
     private int min1 = 4, sec1 = 60;
     private JLabel nith;
@@ -87,7 +88,6 @@ public class Client extends JFrame implements Serializable {
     boolean isClicked = false;//for start click
     boolean timeIsUp = false;
     boolean EndGame = false;
-    //  boolean PlayersTurn = true;
     private boolean Winner = false;
     private boolean Draw = false;
     private JPanel scrollPane1;
@@ -104,23 +104,22 @@ public class Client extends JFrame implements Serializable {
 
     public Client(MainMenu m, String ip, int port) throws IOException {
         main = m;
-        connection = new Socket(ip, port);
+        connection = new Socket(ip, port);//try to make connection with the server 
         OutputStream outToServer = connection.getOutputStream();
-        out = new ObjectOutputStream(outToServer);
+        out = new ObjectOutputStream(outToServer);//create new stream
         InputStream inFromServer = connection.getInputStream();
-        in = new ObjectInputStream(inFromServer);
-        outdata = new DataOutputStream(connection.getOutputStream());
-        indata = new DataInputStream(connection.getInputStream());
+        in = new ObjectInputStream(inFromServer);//create new in stream
+        outdata = new DataOutputStream(connection.getOutputStream());//create new out data stream
+        indata = new DataInputStream(connection.getInputStream());//create new in data stream
         initComponents();
-        this.alliance = Alliance.BLUE;
-        board.changeCurrentPlayer();
+        this.alliance = Alliance.BLUE;//client is always the blue player
+        board.changeCurrentPlayer();//change the currentplayer of the board so the blue player can set his pawn on the board
         setTitle("Spartan");
         Start = true;
-
         sourceTile = null;
         destinationTile = null;
         MovedPawn = null;
-        bluePlayer = board.getBluePlayer();
+        bluePlayer = board.getBluePlayer();//initialize the players
         redPlayer = board.getRedPlayer();
         Image logo = new ImageIcon(getClass().getResource("/spartan/Images/logo.png")).getImage();
         setAlwaysOnTop(true);
@@ -138,19 +137,18 @@ public class Client extends JFrame implements Serializable {
                 (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight() + 10), Image.SCALE_SMOOTH);
         jLabel1.setIcon(new ImageIcon(map));
         setIconImage(logo);
-        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);//set the frame so it cant be closed
 
         jPanel1.setLayout(new GridLayout(10, 10));
-        jPanel1.setBackground(new Color(0, 0, 0, 0));
-        tiles = new ArrayList<>();
-
+        jPanel1.setBackground(new Color(0, 0, 0, 0));// make jPanel1 transaparansy
+        tiles = new ArrayList<>();//this is the arraylist with the tiles of the board and what they contain
         for (int i = 0; i < 10; i++) {
             for (int j = 0; j < 10; j++) {
-                if (i * 10 + j == 42 || i * 10 + j == 43 || i * 10 + j == 46 || i * 10 + j == 47 || i * 10 + j == 52 || i * 10 + j == 53 || i * 10 + j == 56 || i * 10 + j == 57) {
-                    tiles.add(new TilePanel(i * 10 + j, null, 0));
+                if (i * 10 + j == 42 || i * 10 + j == 43 || i * 10 + j == 46 || i * 10 + j == 47 || i * 10 + j == 52 || i * 10 + j == 53 || i * 10 + j == 56 || i * 10 + j == 57) {//if we are in a column
+                    tiles.add(new TilePanel(i * 10 + j, null, 0));// Tilepanel is a new class which has a tile object and other informations
                     tiles.get(i * 10 + j).setLayout(new BorderLayout());
                     tiles.get(i * 10 + j).setBorder(BorderFactory.createLineBorder(Color.GRAY));
-                    tiles.get(i * 10 + j).setBackground(new Color(0, 0, 0, 50));
+                    tiles.get(i * 10 + j).setBackground(new Color(0, 0, 0, 50));//set a soft black color in this tile
 
                 } else {
                     tiles.add(new TilePanel(i * 10 + j, null, 0));
@@ -158,10 +156,9 @@ public class Client extends JFrame implements Serializable {
                     tiles.get(i * 10 + j).setBorder(BorderFactory.createLineBorder(Color.GRAY));
                     tiles.get(i * 10 + j).setBackground(new Color(0, 0, 0, 0));
                 }
-                //     jPanel1.add(tiles.get(i * 10 + j));
             }
         }
-        for (int i = 99; i >= 0; i--) {
+        for (int i = 99; i >= 0; i--) {//because client is a blue player we load the tiles on in jPanel up side down so we can watch from the lower side of the board
             jPanel1.add(tiles.get(i));
         }
         jPanel1.revalidate();
@@ -169,9 +166,9 @@ public class Client extends JFrame implements Serializable {
         setLocation(-3, 0);
         StartPane = new JPanel();
         if (!alliance.isBlue()) {
-            StartPane.setBackground(new Color(204, 0, 0, 255));
+            StartPane.setBackground(new Color(204, 0, 0, 255));//make it red
         } else {
-            StartPane.setBackground(new Color(0, 0, 204, 255));
+            StartPane.setBackground(new Color(0, 0, 204, 255));// make it blue
         }
         StartPane.setVisible(true);
         StartPane.setSize((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 2, (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 3);
@@ -183,7 +180,7 @@ public class Client extends JFrame implements Serializable {
         tilesblue = new ArrayList<>();
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 10; j++) {
-                if (!alliance.isBlue()) {
+                if (!alliance.isBlue()) {// this part will be used later if we decide to make the client to can be red player too
                     tilesblue.add(new TilePanel(i * 10 + j, this.redPlayer.getPawnOfStack(i * 10 + j), 1));
                     this.redPlayer.setCordinateofPawn(i * 10 + j, (i * 10 + j + 1) * (-1), 1, !isClicked);
                     tilesblue.get(i * 10 + j).setLayout(new BorderLayout());
@@ -191,8 +188,8 @@ public class Client extends JFrame implements Serializable {
                     this.redPlayer.getPawnOfStack(i * 10 + j).setSide(true);
                     tilesblue.get(i * 10 + j).add(new JLabel(this.redPlayer.getPawnOfStack(i * 10 + j).getImage()));
                     tilesblue.get(i * 10 + j).setBackground(new Color(0, 0, 0, 0));
-                } else {
-                    tilesblue.add(new TilePanel(i * 10 + j, this.bluePlayer.getPawnOfStack(i * 10 + j), 1));
+                } else {// for now 
+                    tilesblue.add(new TilePanel(i * 10 + j, this.bluePlayer.getPawnOfStack(i * 10 + j), 1));//add new Tile panels with the pawns of the blue's hand
                     this.bluePlayer.setCordinateofPawn(i * 10 + j, (i * 10 + j + 1) * (-1), 1, !isClicked);
                     tilesblue.get(i * 10 + j).setLayout(new BorderLayout());
                     tilesblue.get(i * 10 + j).setBorder(BorderFactory.createLineBorder(Color.GRAY));
@@ -242,10 +239,10 @@ public class Client extends JFrame implements Serializable {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (!isClicked || timeIsUp) {
-                    return;
+                    return;//is the player hasnt press the start or if time is up for the board set do nothing
                 }
                 try {
-                    Random(alliance);
+                    Random(alliance);//call the random and create a random set of your pawn in the board
                 } catch (IOException ex) {
                     Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (ClassNotFoundException ex) {
@@ -264,16 +261,16 @@ public class Client extends JFrame implements Serializable {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                if (isClicked) {
+                if (isClicked) {//is the player has already press the start button
                     timer.stop();
                 }
 
                 try {
-                    Close();
+                    Close();//close the connection and everything else we need to close
                 } catch (Exception ex) {
                     Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                main.setVisible(true);
+                main.setVisible(true);//bring back the menu
                 getThisJFrame().dispose();
 
             }
@@ -288,13 +285,12 @@ public class Client extends JFrame implements Serializable {
         help.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if ((board.getCurrentPlayer().getAlliance().isBlue() == alliance.isBlue()) && !Start) {
-                    Move move = board.getCurrentPlayer().BotMove(board.getGameBoard());
-                    tiles.get(move.getCurrentCoordinate()).setBackground(new Color(255, 0, 0, 50));
+                if ((board.getCurrentPlayer().getAlliance().isBlue() == alliance.isBlue()) && !Start) {//can activate this button only when we are in the main game and its the blue player turn
+                    Move move = board.getCurrentPlayer().BotMove(board.getGameBoard());//choose a random move 
+                    tiles.get(move.getCurrentCoordinate()).setBackground(new Color(255, 0, 0, 50));//change the color so the player can see it
                     tiles.get(move.getDestinationCoordinate()).setBackground(new Color(255, 0, 0, 50));
-                    jPanel1.removeAll();
+                    jPanel1.removeAll();//refresh the jPanel
                     for (int i = 99; i >= 0; i--) {
-
                         if (tiles.get(i).getPos() != move.getCurrentCoordinate() && tiles.get(i).getPos() != move.getDestinationCoordinate()) {
                             tiles.get(i).drawTile();
                         }
@@ -311,21 +307,19 @@ public class Client extends JFrame implements Serializable {
         scrollPane1.setLocation((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 2, (int) ((Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 3) * 2 + (int) ((Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 10));
         scrollPane1.setBackground(Color.yellow);
         scrollPane1.setSize((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 4, (int) ((Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 3) * 2 + (int) ((Toolkit.getDefaultToolkit().getScreenSize().getHeight())));
-        // scrollPane1.setLayout();
         moves = new ArrayList<>();
         OptionPane.add(random);
         OptionPane.add(help);
         OptionPane.add(exit);
-
         MovePane = new JPanel();
         MovePane.setBackground(Color.DARK_GRAY);
         MovePane.setVisible(true);
         MovePane.setSize((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 4, (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 10);
         MovePane.setLocation((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 2 + 1, (int) ((Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 3) * 2);
-        min = new JLabel("0" + (min1 + 1));
+        min = new JLabel("0" + (min1 + 1));//create the timer variables
         sec = new JLabel("0" + (sec1 - 60));
         nith = new JLabel(":");
-        if ((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() > 1500) {
+        if ((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() > 1500) {//initialiaze the size of the fond depense the size of the screen
             nith.setFont(new Font("Serif", Font.BOLD, 30));
             min.setFont(new Font("Serif", Font.BOLD, 30));
             sec.setFont(new Font("Serif", Font.BOLD, 30));
@@ -351,15 +345,11 @@ public class Client extends JFrame implements Serializable {
         min.setForeground(Color.WHITE);
         nith.setForeground(Color.WHITE);
         message.setForeground(Color.WHITE);
-
-        //      MovePane.add(scroll);
         start.addActionListener(new ActionListener() {
-
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (!isClicked) {
                     start.setEnabled(false);
-
                     try {
                         outdata.writeBoolean(true);
                     } catch (IOException ex) {
@@ -374,11 +364,10 @@ public class Client extends JFrame implements Serializable {
                     timer = new Timer(1000, new ActionListener() {
 
                         @Override
-                        public void actionPerformed(ActionEvent e) {
-                            if (board.boardFull(alliance)) {
-                                start.setEnabled(true);
+                        public void actionPerformed(ActionEvent e) {//that actions are done every second
+                            if (board.boardFull(alliance)) {//check if every pawn is set
+                                start.setEnabled(true);//if yes activate the ready choise button
                                 start.setBackground(Color.green);
-
                             } else {
                                 start.setEnabled(false);
                             }
@@ -386,15 +375,12 @@ public class Client extends JFrame implements Serializable {
                             min.setForeground(Color.WHITE);
                             nith.setForeground(Color.WHITE);
                             message.setForeground(Color.WHITE);
-                            if (sec1 == 0) {
+                            if (sec1 == 0) {//when the seconds ready the zero
                                 sec1 = 60;
                                 min1--;
-
                             }
 
-                            if (min1 < 0) {
-                                //TODO more
-                                //   timeIsUp = true;
+                            if (min1 < 0) {//if the minites are less than 0 then time is up
                                 if (!board.boardFull(alliance) && Start) {
                                     try {
                                         Random(alliance);
@@ -405,11 +391,10 @@ public class Client extends JFrame implements Serializable {
                                     }
                                 }
                                 if (Start) {
-
                                     start.setEnabled(false);
                                     try {
-                                        out.writeObject(bluePlayer.getActivePawns());
-                                        Random(Alliance.RED);
+                                        out.writeObject(bluePlayer.getActivePawns());// send the final set of the board to the opponent
+                                        Random(Alliance.RED);//initialize the opponent set on the board
                                     } catch (IOException ex) {
                                         Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
                                     } catch (ClassNotFoundException ex) {
@@ -426,34 +411,32 @@ public class Client extends JFrame implements Serializable {
                                     Start = false;
                                     timer.start();
 
-                                    GamePlay();
-                                    board.changeCurrentPlayer();
+                                    GamePlay();//update the valid moves of the players and check if we have reach in the end of the game
+                                    board.changeCurrentPlayer();//change the current player because red must play first
                                     firstRound = true;
 
                                 } else {
 
-                                    EndGame = true;
-                                    //MovePane.setVisible(false);
+                                    EndGame = true;//if time is up then someone have lose because he didnt make a move
                                     timer.stop();
 
-                                    if (board.getCurrentPlayer().getAlliance().isBlue() == alliance.isBlue()) {
+                                    if (board.getCurrentPlayer().getAlliance().isBlue() == alliance.isBlue()) {//if it was  blue player's turn
                                         JOptionPane.showMessageDialog(getThisJFrame(), "You Lose.... Time is up", "END GAME", JOptionPane.INFORMATION_MESSAGE);
                                         updateComponentTreeUI(getThisJFrame());
 
-                                    } else {
+                                    } else {//if it was red player's turn
                                         JOptionPane.showMessageDialog(getThisJFrame(), "You Win!! Time is up for the opponent.", "END GAME", JOptionPane.INFORMATION_MESSAGE);
                                         updateComponentTreeUI(getThisJFrame());
-
                                     }
                                 }
                             } else {
-                                if (!Start) {
-                                    if (firstRound) {
+                                if (!Start) {//if we are in the main game 
+                                    if (firstRound) {//if we are in the first turn
                                         try {
-                                            if (indata.readInt() == 0) {
+                                            if (indata.readInt() == 0) {//if the input data is 0 the do nothing
                                             } else {
                                                 firstRound = false;
-                                                OpponentMove();
+                                                OpponentMove();//opponent has just send his move. go to execute it
                                             }
                                         } catch (IOException ex) {
                                             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
@@ -463,13 +446,13 @@ public class Client extends JFrame implements Serializable {
                                     } else {
                                         if (board.getCurrentPlayer().getAlliance().isBlue() == alliance.isBlue()) {
                                             try {
-                                                outdata.writeInt(0);
+                                                outdata.writeInt(0);// send a 0 every second in your turn until you make a move
                                             } catch (IOException ex) {
                                                 Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
                                             }
                                         } else {
                                             try {
-                                                if (indata.readInt() != 0) {
+                                                if (indata.readInt() != 0) {//when the indata wont be 0 go to make the opponent move
                                                     OpponentMove();
                                                 }
                                             } catch (IOException ex) {
@@ -503,11 +486,11 @@ public class Client extends JFrame implements Serializable {
 
                     });
                     timer.start();
-                } else {
+                } else {// when the player click ready 
                     start.setEnabled(false);
                     try {
-                        out.writeObject(bluePlayer.getActivePawns());
-                        Random(Alliance.RED);
+                        out.writeObject(bluePlayer.getActivePawns());//set the arraylist with the active pawns with their final cordinates
+                        Random(Alliance.RED);//take the opponent hand 
                     } catch (IOException ex) {
                         Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
                     } catch (ClassNotFoundException ex) {
@@ -524,13 +507,11 @@ public class Client extends JFrame implements Serializable {
                     Start = false;
                     timer.start();
 
-                    GamePlay();
-                    board.changeCurrentPlayer();
+                    GamePlay();// update the legal moves and check if we have a winner
+                    board.changeCurrentPlayer();// change the current player
                     firstRound = true;
-
                 }
             }
-
         });
 
         add(MovePane);
@@ -586,6 +567,10 @@ public class Client extends JFrame implements Serializable {
         this.move = move;
     }
 
+    /**
+     * use this function to terminate the conection between server and client
+     * @throws IOException 
+     */
     public void Close() throws IOException {
         if (isClicked) {
             timer.stop();
@@ -595,18 +580,21 @@ public class Client extends JFrame implements Serializable {
         connection.close();
     }
 
+    /**
+     * Update the legal moves and check if we have a winner.
+     */
     private void GamePlay() {
-        this.board.getCurrentPlayer().calculateLegalMoves(board);//.setLegalMoves(this.board.getCurrentPlayer().calculateLegalMoves(this.board.getCurrentPlayer().getActivePawns().getStack(), board));
-        this.board.getCurrentPlayer().getOpponent().calculateLegalMoves(board);//.setLegalMoves(this.board.getCurrentPlayer().getOpponent().calculateLegalMoves(this.board.getCurrentPlayer().getOpponent().getActivePawns().getStack(), board));
-        if (redPlayer.getAvailablePawns().isEmpty() && bluePlayer.getAvailablePawns().isEmpty()) {
+        this.board.getCurrentPlayer().calculateLegalMoves(board);
+        this.board.getCurrentPlayer().getOpponent().calculateLegalMoves(board);
+        if (redPlayer.getAvailablePawns().isEmpty() && bluePlayer.getAvailablePawns().isEmpty()) {// if both players dont have any move to make
             Draw = true;
             EndGame = true;
-        } else if (redPlayer.getAvailablePawns().isEmpty()) {
+        } else if (redPlayer.getAvailablePawns().isEmpty()) {//if red player, the opponent has no move to make
             EndGame = true;
 
             Winner = true;
 
-        } else if (bluePlayer.getAvailablePawns().isEmpty()) {
+        } else if (bluePlayer.getAvailablePawns().isEmpty()) {//if blue player, you, have no moves to make
 
             EndGame = true;
 
@@ -614,13 +602,21 @@ public class Client extends JFrame implements Serializable {
         }
     }
 
+    /**
+     * Create random set on the board for the client or 
+     * copy the set on the board of the server, depense the alliance.
+     * 
+     * @param a is the alliance 
+     * @throws IOException
+     * @throws ClassNotFoundException 
+     */
     private void Random(Alliance a) throws IOException, ClassNotFoundException {
         ArrayList<Pawn> rand = new ArrayList<>();
         int min, max;
         if (a.isBlue()) {
             rand = bluePlayer.Random();
-            min = 0;
-            max = 40;
+            min = 0;//the minimun position on the board
+            max = 40;//the maximun position on the board
             StartPane.removeAll();
             for (int i = 0; i < 40; i++) {
                 tilesblue.set(i, new TilePanel(i, null, 1));
@@ -632,20 +628,20 @@ public class Client extends JFrame implements Serializable {
             StartPane.repaint();
             StartPane.updateUI();
         } else {
-            rand = (ArrayList<Pawn>) in.readObject();
+            rand = (ArrayList<Pawn>) in.readObject();//read the opponent arrayling 
             for (Pawn pawn : rand) {
-                pawn.setSide(false);
+                pawn.setSide(false);//set the opponent side
             }
             redPlayer.setStack(rand);
 
             for (Pawn pawn : rand) {
-                this.board.setPawnOnBoard(pawn.getPositionOfPawn(), pawn);
+                this.board.setPawnOnBoard(pawn.getPositionOfPawn(), pawn);//set every pawn on the board
             }
             min = 60;
             max = 100;
         }
 
-        jPanel1.removeAll();
+        jPanel1.removeAll();//refresh the jPanel ( board )
         for (int i = min; i < max; i++) {
             tiles.remove(rand.get(i - min).getPositionOfPawn());
             tiles.add(rand.get(i - min).getPositionOfPawn(), new TilePanel(rand.get(i - min).getPositionOfPawn(), rand.get(i - min), 0));
@@ -662,32 +658,37 @@ public class Client extends JFrame implements Serializable {
 
     }
 
+    /**
+     * This is used to make the move of the opponent
+     * 
+     * @throws IOException
+     * @throws ClassNotFoundException 
+     */
     private void OpponentMove() throws IOException, ClassNotFoundException {
 
-        GamePlay();
-        final Move move = (Move) in.readObject();
+        GamePlay();//update the legal moves and check for winner
+        final Move move = (Move) in.readObject();//read the opponent move 
         final MoveTransition transition = board.getCurrentPlayer().makeMove(move);
-        board = transition.getToBoard();
+        board = transition.getToBoard();//update the board
         TilePanel temp = tiles.get(move.getDestinationCoordinate());
-        if (temp.getPawn() == null) {
+        if (temp.getPawn() == null) {// update the tiles arraylist if the destination tile isnt occupied
             tiles.remove(move.getDestinationCoordinate());
             tiles.add(move.getDestinationCoordinate(), new TilePanel(move.getDestinationCoordinate(), move.getPawn(), 0));
-        } else {
-            Pawn winner = board.Conflict(move.getPawn(), temp.getPawn());
-            move.getPawn().setSide(true);
+        } else {//if it is occupied
+            Pawn winner = board.Conflict(move.getPawn(), temp.getPawn());//check the winner of the conflict
+            move.getPawn().setSide(true);//make both pawns to be flipped up
             temp.getPawn().setSide(true);
-            if (winner == null) {
+            if (winner == null) {// if the is no winner then both go out
                 tiles.remove(move.getDestinationCoordinate());
                 tiles.add(move.getDestinationCoordinate(), new TilePanel(move.getDestinationCoordinate(), null, 0));
                 board.getCurrentPlayer().getOpponent().DeletePawn(temp.getPawn());
                 board.getCurrentPlayer().DeletePawn(move.getPawn());
-                OpponentPane.removeAll();
+                OpponentPane.removeAll();//update the opponentPnae
                 int k = move.getPawn().getTablePos();
                 tilesoppent.set(k, new TilePanel(k, move.getPawn(), 1));
                 tilesoppent.get(k).add(new JLabel(move.getPawn().getImage()));
                 for (final TilePanel boardTile : tilesoppent) {
                     if (boardTile.getPos() == k) {
-                        //move.getPawn().setCordinateOfPawn(-1);
                         OpponentPane.add(boardTile);
                     } else {
                         boardTile.drawTile();
