@@ -1,7 +1,6 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * This class is about of the move . It contains some usefull componets of Board in order to adjust the move in Board.
+ * 
  */
 package spartan.player;
 
@@ -9,9 +8,10 @@ import spartan.board.Board;
 import spartan.board.Move;
 
 /**
- * 
- * 
- * @author Pantelis Ypsilanti 2962 , Odysseas Zagoras 2902 , Theodoros Mosxos 2980
+ *
+ * The fields are the Board (from and to) . Each move changes the structure of
+ * Board so we need from and to. Move Status indicates what kind of Move was.
+ * For example ,if it is Done and if is Illegal .
  */
 public class MoveTransition {
 
@@ -20,6 +20,14 @@ public class MoveTransition {
     private final Move transitionMove;
     private final MoveStatus moveStatus;
 
+    /**
+     * Constructor and Initialization.
+     *
+     * @param fromBoard
+     * @param toBoard
+     * @param transitionMove
+     * @param moveStatus
+     */
     public MoveTransition(final Board fromBoard,
             final Board toBoard,
             final Move transitionMove,
@@ -30,6 +38,9 @@ public class MoveTransition {
         this.moveStatus = moveStatus;
     }
 
+    /**
+     * Getters of fields.      *
+     */
     public Board getFromBoard() {
         return this.fromBoard;
     }
@@ -46,21 +57,20 @@ public class MoveTransition {
         return this.moveStatus;
     }
 
+    /**
+     * Enumeration of the moveStatus,
+     * implements the abstact method of isDone.
+     */
+
     public enum MoveStatus {
 
-        DONE {
+        DONE {//legal move
             @Override
             public boolean isDone() {
                 return true;
             }
         },
-        ILLEGAL_MOVE {
-            @Override
-            public boolean isDone() {
-                return false;
-            }
-        },
-        LEAVES_PLAYER_IN_CHECK {
+        ILLEGAL_MOVE {//illegal move
             @Override
             public boolean isDone() {
                 return false;
