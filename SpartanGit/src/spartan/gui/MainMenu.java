@@ -41,8 +41,11 @@ import networksocket.Server;
 import spartan.Alliance;
 
 /**
+ * This class is the JFrame of the start, Contains the modes of the game options
+ * and help.
  *
- * @author Pantelis Ypsilanti 2962 , Odysseas Zagoras 2902 , Theodoros Mosxos 2980
+ *  * @author Pantelis Ypsilanti 2962 , Odysseas Zagoras 2902 , Theodoros Mosxos
+ * 2980
  */
 public class MainMenu extends javax.swing.JFrame {
 
@@ -56,17 +59,7 @@ public class MainMenu extends javax.swing.JFrame {
         initComponents();
         setTitle("Spartan");
         setLocation(-3, 0);
-        alliance = Alliance.RED;
-        /*java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-
-                               single= new SinglePlayer(Alliance.RED, getThisJFrame());
-         single.setVisible(false);
-         
-            }
-        });*/
-        //  load.setVisible(true);
-        //  load.setVisible(false);
+        alliance = Alliance.RED;//when the game start the player in the single mode have the red pawns
         Image logo = new ImageIcon(getClass().getResource("/spartan/Images/logo.png")).getImage();
         setAlwaysOnTop(true);
         setResizable(false);
@@ -79,13 +72,12 @@ public class MainMenu extends javax.swing.JFrame {
         jLabel1.setLocation(-3, 0);
         jPanel1.setSize((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() + 10, (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight() + 5);
         jPanel1.setLocation(-3, 0);
-        jPanel1.setBackground(new Color(0, 0, 0, 0));
+        jPanel1.setBackground(new Color(0, 0, 0, 0));// so in will be transparenti
         setIconImage(logo);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         ImageIcon img = new ImageIcon(Toolkit.getDefaultToolkit().getClass().getResource("/spartan/Images/map.png"));
         Image img1 = img.getImage().getScaledInstance((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() + 10, (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight() + 5, Image.SCALE_SMOOTH);
         jLabel1.setIcon(new ImageIcon(img1));
-        // jPanel1.setLayout(new GridLayout(3,1));
         JButton Single = new JButton("Single");
         ImageIcon button2 = new ImageIcon(Toolkit.getDefaultToolkit().getClass().getResource("/spartan/Images/singleplayerbutton.png"));
         Image button3 = button2.getImage().getScaledInstance((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 4 + 45, 150, Image.SCALE_SMOOTH);
@@ -94,14 +86,14 @@ public class MainMenu extends javax.swing.JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                Load load = new Load();
+                Load load = new Load();// create a load object. THis is the splash screen
                 load.setVisible(true);
                 java.awt.EventQueue.invokeLater(new Runnable() {
                     public void run() {
-                        getThisJFrame().setVisible(false);
+                        getThisJFrame().setVisible(false);//set visible false
                         single = new SinglePlayer(alliance, getThisJFrame());
-                        single.setVisible(true);
-                        load.dispose();
+                        single.setVisible(true);//when it is loadid set this jFrame visible
+                        load.dispose();//clear the splash screen and free the memory
                     }
                 });
             }
@@ -120,7 +112,7 @@ public class MainMenu extends javax.swing.JFrame {
                 Random r = new Random();
                 int port;
                 Object[] options = {"Create Game",
-                    "Join Game"};
+                    "Join Game"};//this will be the button in th joptionPane
                 int n = JOptionPane.showOptionDialog(getThisJFrame(),
                         "Would you like to create Game or to Join in another game?",
                         "MultiPlayer",
@@ -129,38 +121,36 @@ public class MainMenu extends javax.swing.JFrame {
                         null, //do not use a custom Icon
                         options, //the titles of buttons
                         options[0]); //default button title
-                //choise.put("OptionPane.cancelButtonText", "nope");
-                //choise.put("OptionPane.okButtonText", "yup");
-                if (n == JOptionPane.YES_OPTION) {
+                if (n == JOptionPane.YES_OPTION) {//if the user choose create game then
 
                     do {
                         port = r.nextInt(9000);
-                        if (port > 4000) {
+                        if (port > 4000) {//choose a random port between 4000 and 9000 
                             break;
                         }
                     } while (true);
                     try {
-                        String ip = null;
+                        String ip = null;//search for the ip
                         try {
-                            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+                            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();//get every ip mask etc
                             while (interfaces.hasMoreElements()) {
                                 NetworkInterface iface = interfaces.nextElement();
                                 // filters out 127.0.0.1 and inactive interfaces
                                 if (iface.isLoopback() || !iface.isUp()) {
-                                    continue;
+                                    continue;//if the ip is 127.0.0.1 
                                 }
-                                
+
                                 Enumeration<InetAddress> addresses = iface.getInetAddresses();
                                 while (addresses.hasMoreElements()) {
                                     InetAddress addr = addresses.nextElement();
-                                    
+
                                     // *EDIT*
                                     if (addr instanceof Inet6Address) {
-                                        continue;
+                                        continue;//if the ip is IPV6
                                     }
-                                    
+
                                     if (iface.getDisplayName().contains("VirtualBox")) {
-                                        continue;
+                                        continue;//if it isnt the physical address
                                     }
                                     ip = addr.getHostAddress();
                                     System.out.println(iface.getDisplayName() + " " + ip);
@@ -171,8 +161,8 @@ public class MainMenu extends javax.swing.JFrame {
                         }
                         System.out.println("Current IP address : " + ip);
                         System.out.println(port);
-                        JOptionPane.showMessageDialog(getThisJFrame(), "Your ip " + ip + "\nYour Port    " + String.valueOf(port), "INFO", 1);
-                        l.run();
+                        JOptionPane.showMessageDialog(getThisJFrame(), "Your Address " + ip + "\nYour Password  " + String.valueOf(port), "INFO", 1);//show the ip and the port of the server
+                        l.run();//start the load screen
                         l.setVisible(true);
                         getThisJFrame().setVisible(false);
                         server = new Server(getThisJFrame(), port);
@@ -184,16 +174,16 @@ public class MainMenu extends javax.swing.JFrame {
                     } catch (IOException ex) {
                         Logger.getLogger(MainMenu.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                } else if (n == JOptionPane.NO_OPTION) {
+                } else if (n == JOptionPane.NO_OPTION) {// if he press join 
                     JTextField username = new JTextField();
                     JTextField password = new JPasswordField();
-                    Object[] message = {
+                    Object[] message = {// he must add  the ip and the port
                         "Address:", username,
                         "Password:", password
                     };
 
                     int option = JOptionPane.showConfirmDialog(getThisJFrame(), message, "Login", JOptionPane.OK_CANCEL_OPTION);
-                    if (option == JOptionPane.OK_OPTION) {
+                    if (option == JOptionPane.OK_OPTION) {// if he press ok the the client programm start
                         Client client;
 
                         l.run();
@@ -201,7 +191,7 @@ public class MainMenu extends javax.swing.JFrame {
                         getThisJFrame().setVisible(false);
                         int nym = 0;
                         try {
-                            nym = Integer.parseInt(password.getText());
+                            nym = Integer.parseInt(password.getText());// change the port from string to integer
                             client = new Client(getThisJFrame(), username.getText(), nym); //getThisJFrame().setVisible(false);
                             client.setVisible(true);
                             l.dispose();
@@ -210,26 +200,19 @@ public class MainMenu extends javax.swing.JFrame {
                             getThisJFrame().dispose();
                             new MainMenu().setVisible(true);
                         } catch (IOException ex) {
-                            //  Logger.getLogger(MainMenu.class.getName()).log(Level.SEVERE, null, ex);
                             JOptionPane.showMessageDialog(getThisJFrame(), "Invalid Input", "ERROR", JOptionPane.ERROR_MESSAGE);
                             getThisJFrame().dispose();
                             new MainMenu().setVisible(true);
-
                         }
                     } else {
                         JOptionPane.showMessageDialog(getThisJFrame(), "Canceled");
                     }
-                    //getThisJFrame().setVisible(false);
-
                 }
                 l.dispose();
             }
-
-            // getThisJFrame().dispose();
         });
         Multi.setSize((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 4, (int) ((Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 27) * 3);
         Multi.setLocation((int) ((Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 27) * 10, (int) ((Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 27) * 11);
-
         JButton Exit = new JButton("Exit");
         ImageIcon button4 = new ImageIcon(Toolkit.getDefaultToolkit().getClass().getResource("/spartan/Images/exitbutton.png"));
         Image button5 = button4.getImage().getScaledInstance((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 4 + 45, 150, Image.SCALE_SMOOTH);
@@ -260,11 +243,9 @@ public class MainMenu extends javax.swing.JFrame {
                         null, //do not use a custom Icon
                         options, //the titles of buttons
                         options[0]); //default button title
-                //choise.put("OptionPane.cancelButtonText", "nope");
-                //choise.put("OptionPane.okButtonText", "yup");
-                if (n == JOptionPane.YES_OPTION) {
+                if (n == JOptionPane.YES_OPTION) {//if he choose red player
                     alliance = Alliance.RED;
-                } else if (n == JOptionPane.NO_OPTION) {
+                } else if (n == JOptionPane.NO_OPTION) {//if he choose blue player
                     alliance = Alliance.BLUE;
                 }
             }
@@ -312,12 +293,11 @@ public class MainMenu extends javax.swing.JFrame {
     public static void music() {
         try {
 
-            InputStream input = MainMenu.class.getResource("/spartan/music/4o_cut.wav")
-                    .openStream();
+            InputStream input = MainMenu.class.getResource("/spartan/music/4o_cut.wav").openStream();// load the music file
             AudioInputStream audioIn = AudioSystem.getAudioInputStream(input);
             Clip clip = AudioSystem.getClip();
-            clip.open(audioIn);
-            clip.loop(Clip.LOOP_CONTINUOUSLY);
+            clip.open(audioIn);//start the audio
+            clip.loop(Clip.LOOP_CONTINUOUSLY);//make the audio to play constandly in a loop
 
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
