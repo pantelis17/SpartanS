@@ -11,29 +11,33 @@ import spartan.player.Player;
 import spartan.player.RedPlayer;
 
 /**
- *
- * @author user
+ *This class contains the functions for the changes in the board.
+ * 
+ * @author Pantelis Ypsilanti 2962 , Odysseas Zagoras 2902 , Theodoros Mosxos 2980
  */
 public class Board implements Serializable {
 
-    private ArrayList<Tile> gameBoard;
-    private final BluePlayer bluePlayer;
-    private final RedPlayer redPlayer;
-    private Player currentPlayer;
+    private ArrayList<Tile> gameBoard;// This arrayList contains every tile in the board. A tile is the square in the board. This board contains 100 tiles.
+    private final BluePlayer bluePlayer;// This is the blue player
+    private final RedPlayer redPlayer;//this is the red Player
+    private Player currentPlayer; // This is the player who's turn is on.
 
     public Board() {
-        this.gameBoard = createGameBuilder();
-        this.bluePlayer = new BluePlayer(this);
-        this.redPlayer = new RedPlayer(this);
-        // this.currentPlayer = builder.nextMoveMaker.choosePlayerByAlliance(this.bluePlayer, this.redPlayer);
-        this.currentPlayer = this.redPlayer;
-        this.toStringBoard();
+        this.gameBoard = createGameBuilder();//initialize the board's tiles
+        this.bluePlayer = new BluePlayer(this);//create a new blueplayer
+        this.redPlayer = new RedPlayer(this);//create a new redPLayer
+        this.currentPlayer = this.redPlayer;// the currentPlayer is the red. This comes from the rules of the game
+        this.toStringBoard();// print the current board
     }
 
+    /**
+     * We call this function every time the players are changing turns.
+     */
     public void changeCurrentPlayer() {
-        this.currentPlayer = this.currentPlayer.getOpponent();
+        this.currentPlayer = this.currentPlayer.getOpponent();// if the currentPlayer is the red then the currentPlayer will be now the blue.
     }
 
+    
     public ArrayList<Tile> getGameBoard() {
         return this.gameBoard;
     }
@@ -42,41 +46,52 @@ public class Board implements Serializable {
         return this.currentPlayer;
     }
 
+    /**
+     * 
+     * @param tileCordinate is the number of the tile in the board
+     * @return the specific tile with every information for it ( pawn on it, cordinates etc)
+     */
     public Tile getTile(int tileCordinate) {
         return this.gameBoard.get(tileCordinate);
     }
 
+    /**
+     * Check if the player has all of his pawn in board and if he is able to make at least one move with this set.
+     * 
+     * @param a is the alliance of the player
+     * @return true if the player has every pawn on board else return false
+     */
     public boolean boardFull(Alliance a) {
-        if (!a.isBlue()) {
-            int unableToMove = 0;
-            for (int i = 60; i < 100; i++) {
-                if (!this.gameBoard.get(i).isTileOccupied()) {
+        if (!a.isBlue()) {// if the player has red color
+            int unableToMove = 0;// this value check how many pawns of the front line cant move
+            for (int i = 60; i < 100; i++) {//for each tile from 60-100 (because is the red player) check if the tile has pawn on it
+                if (!this.gameBoard.get(i).isTileOccupied()) {// if at least one tile isnt occupied then we stop the loop and return false.
                     return false;
                 }
-                if (i < 70) {
+                if (i < 70) {//each tile in the front line
                     if (this.gameBoard.get(i).getPawn().getValue() == -1 || this.gameBoard.get(i).getPawn().getValue() == 0 || i == 62 || i == 63 || i == 66 || i == 67) {
-                        unableToMove++;
+                        unableToMove++;//if it is bomb , flag or it is behind the columns 
                     }
                 }
                 if (unableToMove == 10) {
-                    return false;
+                    return false; // if we have 10 unable to move pawns the the player cant move anything so we break the loop and return false
                 }
             }
 
             return true;
         } else {
-            int unableToMove = 0;
-            for (int i = 0; i < 40; i++) {
+            int unableToMove = 0; // this value check how many pawns of the front line cant move
+            for (int i = 0; i < 40; i++) {//for each tile from 0-40 (because is the blue player) check if the tile has pawn on it
                 if (!this.gameBoard.get(i).isTileOccupied()) {
-                    return false;
+                    return false;// if at least one tile isnt occupied then we stop the loop and return false.
                 }
-                if (i >= 30) {
+                if (i >= 30) {//each tile in the front line
                     if (this.gameBoard.get(i).getPawn().getValue() == -1 || this.gameBoard.get(i).getPawn().getValue() == 0 || i == 32 || i == 33 || i == 36 || i == 37) {
-                        unableToMove++;
+                        unableToMove++;//if it is bomb , flag or it is behind the columns
                     }
                 }
                 if (unableToMove == 10) {
-                    return false;
+                    return false;// if we have 10 unable to move pawns the the player cant move anything so we break the loop and return false
                 }
             }
             return true;
@@ -85,24 +100,26 @@ public class Board implements Serializable {
 
     private ArrayList<Tile> createGameBuilder() {
         ArrayList<Tile> tiles = new ArrayList<>();
-        for (int i = 0; i < BoardUtilities.NUM_TILES; i++) {
-            tiles.add(new Tile(i, null));
+        for (int i = 0; i < BoardUtilities.NUM_TILES; i++) {//depense on the how many time our board has 
+            tiles.add(new Tile(i, null));// create a new tile object for each square
         }
 
         return tiles;
     }
 
+    /**
+     * 
+     * @param position the cordinate where the pawn will be
+     * @param p is the pawn we move
+     */
     public void setPawnOnBoard(int position, Pawn p) {
-        this.gameBoard.remove(position);
-        this.gameBoard.add(position, new Tile(position, p));
-        /* this.blue = calculateActivePawns(this.gameBoard , Alliance.BLUE);
-        this.red = calculateActivePawns(this.gameBoard , Alliance.RED);
-        this.blueLegalMoves = calculateLegalMoves(this.blue);
-        this.redLegalMoves = calculateLegalMoves(this.red);
-        this.availbleBluePawns = calculatePawnMove(this.blue );
-        this.availbleRedPawns = calculatePawnMove(this.red);*/
+        this.gameBoard.remove(position);// remove this tile from our arraylist
+        this.gameBoard.add(position, new Tile(position, p));// create a new tile in its position
     }
 
+    /**
+     * Is used to print our board in the cmd.
+     */
     public void toStringBoard() {
         int count = 0;
         for (Tile tile : this.gameBoard) {
@@ -118,16 +135,19 @@ public class Board implements Serializable {
         }
     }
 
-    /* 
-     */ public List<Move> getAllLegalMoves() {
-        List<Move> ainte = new ArrayList<>();
+    /**
+     * 
+     * @return every move which exist for both players 
+     */
+    public List<Move> getAllLegalMoves() {
+        List<Move> m = new ArrayList<>();//create a new arraylist for the moves
         for (Move move : this.bluePlayer.getLegalMoves()) {
-            ainte.add(move);
+            m.add(move);//add every move from the blue player
         }
         for (Move move : this.redPlayer.getLegalMoves()) {
-            ainte.add(move);
+            m.add(move);// add every move from the red player
         }
-        return Collections.unmodifiableList(ainte);
+        return Collections.unmodifiableList(m);
     }
 
     public BluePlayer getBluePlayer() {
@@ -138,6 +158,13 @@ public class Board implements Serializable {
         return this.redPlayer;
     }
 
+    /**
+     * This function is used to define who will be the winner after a conflict between the pawns.
+     * The winner is determined from the rules of the game.
+     * @param attacker is the pawn which make the attack
+     * @param defender is the pawn which getting the attack.
+     * @return the pawn which win or null if we had a draw.
+     */
     public Pawn Conflict(Pawn attacker, Pawn defender) {
         if (attacker.getValue() == 1 && defender.getValue() == 10) {
             return attacker;
@@ -157,25 +184,4 @@ public class Board implements Serializable {
             return defender;
         }
     }
-
-    /* public static class Builder{
-        Map<Integer,Pawn> boardConfg;
-        Alliance nextMoveMaker;
-        
-        public Builder() {
-            this.boardConfg = new HashMap<>();
-        }
-        public Builder setPawn(final Pawn pawn){
-            this.boardConfg.put(pawn.getPositionOfPawn(), pawn);
-            return this;
-        }
-        public Builder setMoveMaker( final Alliance nextMoveMaker){
-            this.nextMoveMaker = nextMoveMaker;
-            return this;
-        }
-        public Board build(){
-            return new Board(this);
-        
-        }
-    }*/
 }

@@ -27,7 +27,7 @@ import spartan.player.RedPlayer;
 
 /**
  *
- * @author user
+ * @author Pantelis Ypsilanti 2962 , Odysseas Zagoras 2902 , Theodoros Mosxos 2980
  */
 public class SinglePlayer extends javax.swing.JFrame {
 

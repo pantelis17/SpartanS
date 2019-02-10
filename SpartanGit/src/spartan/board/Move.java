@@ -1,55 +1,77 @@
-
 package spartan.board;
 
 import java.io.Serializable;
 import spartan.pieces.Pawn;
 
 /**
+ * This class with it's subclasses contains the funtions we need to make a move.
  *
- * @author user
+ * @author Pantelis Ypsilanti 2962 , Odysseas Zagoras 2902 , Theodoros Mosxos
+ * 2980
  */
-public abstract class Move implements Serializable{
+public abstract class Move implements Serializable {
+
     private final Board board;
     private final Pawn movedPawn;
     private final int destinationCordinate;
-    private Move(final Board board,final Pawn movedPawn,final int destinationCordinate){
+
+    private Move(final Board board, final Pawn movedPawn, final int destinationCordinate) {
         this.board = board;
         this.destinationCordinate = destinationCordinate;
         this.movedPawn = movedPawn;
     }
-    public int getCurrentCoordinate(){
+
+    public int getCurrentCoordinate() {
         return this.movedPawn.getPositionOfPawn();
     }
-    public int getDestinationCoordinate(){
+
+    public int getDestinationCoordinate() {
         return this.destinationCordinate;
     }
-    public Pawn getPawn(){
+
+    public Pawn getPawn() {
         return movedPawn;
     }
-    public Board execute(){
+
+    /**
+     *
+     * @return the current board after the move
+     */
+    public Board execute() {
         return board;
     }
-    public static final class MajorMove extends Move implements Serializable{
-        
-        public MajorMove(final Board board,final Pawn movedPawn,final int destinationCordinate){
-            super(board,movedPawn,destinationCordinate);
+
+    /**
+     * This class is used when we make a move to an empty tile.
+     */
+    public static final class MajorMove extends Move implements Serializable {
+
+        public MajorMove(final Board board, final Pawn movedPawn, final int destinationCordinate) {
+            super(board, movedPawn, destinationCordinate);
         }
 
     }
-    
-      public static final class AttackMove extends Move implements Serializable{
+
+    /**
+     * This class is used when we make a move to another pawn of the opponent.
+     */
+    public static final class AttackMove extends Move implements Serializable {
+
         private final Pawn attackedPawn;
-        public AttackMove(final Board board,final Pawn movedPawn,final int destinationCordinate,final Pawn attackedPawn){
-            super(board,movedPawn,destinationCordinate);
+
+        public AttackMove(final Board board, final Pawn movedPawn, final int destinationCordinate, final Pawn attackedPawn) {
+            super(board, movedPawn, destinationCordinate);
             this.attackedPawn = attackedPawn;
         }
     }
-      
-    private static class NullMove 
+/**
+ * This class is used when we cant make the move we choose.
+ */
+    private static class NullMove
             extends Move implements Serializable {
 
         private NullMove() {
-            super(null,null, -1);
+            super(null, null, -1);
         }
 
         @Override
@@ -67,7 +89,11 @@ public abstract class Move implements Serializable{
             return "Null Move";
         }
     }
-      public static class MoveFactory {
+
+    /**
+     * This class create the move and check if it is valid.
+     */
+    public static class MoveFactory {
 
         private static final Move NULL_MOVE = new NullMove();
 
@@ -78,18 +104,25 @@ public abstract class Move implements Serializable{
         public static Move getNullMove() {
             return NULL_MOVE;
         }
-
+        
+        /**
+         * 
+         * @param board the current board before the move
+         * @param currentCoordinate is the current codrinate of the pawn
+         * @param destinationCoordinate is the cordinate we want to move
+         * @return the move we choose if it is valid else return a null move
+         */
         public static Move createMove(final Board board,
-                                      final int currentCoordinate,
-                                      final int destinationCoordinate) {
+                final int currentCoordinate,
+                final int destinationCoordinate) {
             for (final Move move : board.getAllLegalMoves()) {
-                
-                if (move.getCurrentCoordinate() == currentCoordinate &&
-                    move.getDestinationCoordinate() == destinationCoordinate) {
-                    return move;
+
+                if (move.getCurrentCoordinate() == currentCoordinate
+                        && move.getDestinationCoordinate() == destinationCoordinate) {
+                    return move;// if the move exists in the legal moves of the player then we return the move
                 }
             }
-            return NULL_MOVE;
+            return NULL_MOVE;// if it doesnt exist we return a null move.
         }
     }
 }

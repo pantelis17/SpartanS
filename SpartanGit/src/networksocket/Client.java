@@ -55,7 +55,7 @@ import spartan.player.RedPlayer;
 
 /**
  *
- * @author pante
+ * @author Pantelis Ypsilanti 2962 , Odysseas Zagoras 2902 , Theodoros Mosxos 2980
  */
 public class Client extends JFrame implements Serializable {
 
@@ -835,14 +835,17 @@ public class Client extends JFrame implements Serializable {
                 tiles.set(a, new TilePanel(a, null, 0));
                 board.setPawnOnBoard(a, null);
                 if(tiles.get(b).getPawn() == null){
+                    System.out.println("mpika gia null");
                     board.setPawnOnBoard(b, null);
                 }
-            } 
+            } else {
+                board.toStringBoard();
+            }
         }
         jPanel1.removeAll();
         for (int i = 99; i >= 0; i--) {
             if (!swap) {
-                if (tiles.get(i).getPos() == b ) {
+                if (tiles.get(i).getPos() == b || tiles.get(i).getPos() == a) {
                     if (tiles.get(i).getPawn() != null) {
                         tiles.get(i).add(new JLabel(tiles.get(i).getPawn().getImage()));
                         if (tiles.get(i).getPos() == b) {

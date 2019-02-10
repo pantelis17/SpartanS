@@ -14,9 +14,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.Inet6Address;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.util.Enumeration;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -38,7 +42,7 @@ import spartan.Alliance;
 
 /**
  *
- * @author pante
+ * @author Pantelis Ypsilanti 2962 , Odysseas Zagoras 2902 , Theodoros Mosxos 2980
  */
 public class MainMenu extends javax.swing.JFrame {
 
@@ -136,37 +140,51 @@ public class MainMenu extends javax.swing.JFrame {
                         }
                     } while (true);
                     try {
-                        InetAddress ip;
+                        String ip = null;
                         try {
-
-                            ip = InetAddress.getLocalHost();
-                            System.out.println("Current IP address : " + ip.getHostAddress());
-                            System.out.println(port);
-                            JOptionPane.showMessageDialog(getThisJFrame(), "Your ip " + ip.getHostAddress() + "\nYour Port    " + String.valueOf(port), "INFO", 1);
-                            l.run();
-                            l.setVisible(true);
-
-                            getThisJFrame().setVisible(false);
-                        } catch (UnknownHostException ex) {
-
-                            ex.printStackTrace();
-
+                            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+                            while (interfaces.hasMoreElements()) {
+                                NetworkInterface iface = interfaces.nextElement();
+                                // filters out 127.0.0.1 and inactive interfaces
+                                if (iface.isLoopback() || !iface.isUp()) {
+                                    continue;
+                                }
+                                
+                                Enumeration<InetAddress> addresses = iface.getInetAddresses();
+                                while (addresses.hasMoreElements()) {
+                                    InetAddress addr = addresses.nextElement();
+                                    
+                                    // *EDIT*
+                                    if (addr instanceof Inet6Address) {
+                                        continue;
+                                    }
+                                    
+                                    if (iface.getDisplayName().contains("VirtualBox")) {
+                                        continue;
+                                    }
+                                    ip = addr.getHostAddress();
+                                    System.out.println(iface.getDisplayName() + " " + ip);
+                                }
+                            }
+                        } catch (SocketException ef) {
+                            throw new RuntimeException(ef);
                         }
+                        System.out.println("Current IP address : " + ip);
+                        System.out.println(port);
+                        JOptionPane.showMessageDialog(getThisJFrame(), "Your ip " + ip + "\nYour Port    " + String.valueOf(port), "INFO", 1);
+                        l.run();
+                        l.setVisible(true);
+                        getThisJFrame().setVisible(false);
                         server = new Server(getThisJFrame(), port);
                         server.setVisible(true);
                         l.dispose();
                     } catch (SocketTimeoutException ex) {
-                        //      Logger.getLogger(MainMenu.class.getName()).log(Level.SEVERE, null, ex);
                         l.dispose();
-//                        server.dispose();
                         getThisJFrame().setVisible(true);
                     } catch (IOException ex) {
                         Logger.getLogger(MainMenu.class.getName()).log(Level.SEVERE, null, ex);
                     }
-
-                    //getThisJFrame().setVisible(false);
                 } else if (n == JOptionPane.NO_OPTION) {
-
                     JTextField username = new JTextField();
                     JTextField password = new JPasswordField();
                     Object[] message = {
@@ -227,7 +245,7 @@ public class MainMenu extends javax.swing.JFrame {
 
         JButton Options = new JButton("Options");
         ImageIcon button8 = new ImageIcon(Toolkit.getDefaultToolkit().getClass().getResource("/spartan/Images/optionbutton.png"));
-        Image button9 = button8.getImage().getScaledInstance((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 4 +50, 150, Image.SCALE_SMOOTH);
+        Image button9 = button8.getImage().getScaledInstance((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 4 + 50, 150, Image.SCALE_SMOOTH);
         Options.setIcon(new ImageIcon(button9));
         Options.addActionListener(new ActionListener() {
             @Override
@@ -351,8 +369,8 @@ public class MainMenu extends javax.swing.JFrame {
     public void main() {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                   music();
-        //        new MainMenu().setVisible(true);
+                music();
+                //        new MainMenu().setVisible(true);
             }
         });
     }

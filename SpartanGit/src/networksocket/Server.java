@@ -54,7 +54,7 @@ import spartan.player.RedPlayer;
 
 /**
  *
- * @author pante
+ * @author Pantelis Ypsilanti 2962 , Odysseas Zagoras 2902 , Theodoros Mosxos 2980
  */
 public class Server extends JFrame implements Serializable {
 
@@ -462,15 +462,10 @@ public class Server extends JFrame implements Serializable {
                                 }
                             }
                         }
-
                     });
                     timer.start();
                 } else {
                     start.setEnabled(false);
-                    // min.setText("");
-                    // sec.setText("");
-                    // nith.setText("");
-                    // message.setText("Wait for Opponent");
                     try {
                         Random(Alliance.BLUE);
                         out.writeObject(redPlayer.getActivePawns());
@@ -726,14 +721,17 @@ public class Server extends JFrame implements Serializable {
                 tiles.set(a, new TilePanel(a, null, 0));
                 board.setPawnOnBoard(a, null);
                 if(tiles.get(b).getPawn() == null){
+                    System.out.println("mpika gia null");
                     board.setPawnOnBoard(b, null);
                 }
-            } 
+            } else {
+                board.toStringBoard();
+            }
         }
         jPanel1.removeAll();
         for (final TilePanel boardTile : tiles) {
             if (!swap) {
-                if (boardTile.getPos() == b ) {
+                if (boardTile.getPos() == b || boardTile.getPos() == a) {
                     if (boardTile.getPawn() != null) {
                         boardTile.add(new JLabel(boardTile.getPawn().getImage()));
                         if (boardTile.getPos() == b) {

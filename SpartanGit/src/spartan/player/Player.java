@@ -13,7 +13,7 @@ import spartan.player.MoveTransition.MoveStatus;
 
 /**
  *
- * @author user
+ * @author Pantelis Ypsilanti 2962 , Odysseas Zagoras 2902 , Theodoros Mosxos 2980
  */
 public abstract class Player implements Serializable {
 

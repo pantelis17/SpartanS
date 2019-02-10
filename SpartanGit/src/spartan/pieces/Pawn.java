@@ -13,35 +13,39 @@ import javax.swing.ImageIcon;
 import spartan.Alliance;
 import spartan.board.*;
 
+/**
+ * This is the parent class which contains functions vital for the right work  of the pawns.
+ * 
+ * @author Pantelis Ypsilanti 2962 , Odysseas Zagoras 2902 , Theodoros Mosxos 2980
+ */
 public abstract class Pawn implements Serializable {
 
-    protected int positionOfPawn;
-    protected final Alliance pawnAlliance;
-    //TODO gia eikones . tha xreiastei kai allo pedio gia eikones logika.
-    protected final ImageIcon front;
-    protected final ImageIcon back;
-    protected final int tablePosition;
-    protected final int Value;
-    private boolean flipped;
+    protected int positionOfPawn;// the position in the board
+    protected final Alliance pawnAlliance; // the color of the pawn
+    protected final ImageIcon front; // the front image of this pawn 
+    protected final ImageIcon back; // the back image . Same for all the pawns in the same alliance
+    protected final int tablePosition; // position in the hand
+    protected final int Value; 
+    private boolean flipped; // if we see the back or the front image. false for the back
 
     Pawn(final int positionOfPawn, final Alliance pawnOfAlliance, final int value, final int pos) {
-        this.positionOfPawn = positionOfPawn;
+        this.positionOfPawn = positionOfPawn;//initialiaze the variables 
         this.pawnAlliance = pawnOfAlliance;
         this.Value = value;
         flipped = false;
         this.tablePosition = pos;
         if (this.pawnAlliance.isBlue()) {
             ImageIcon img0 = new ImageIcon(Toolkit.getDefaultToolkit().getClass().getResource("/spartan/Images/blue.png"));
-            Image img1 = img0.getImage().getScaledInstance((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() / 24, (int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() / 24, Image.SCALE_SMOOTH);
+            Image img1 = img0.getImage().getScaledInstance((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() / 24, (int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() / 24, Image.SCALE_SMOOTH); // set the size depense on the screen size 
             ImageIcon img2 = new ImageIcon(Toolkit.getDefaultToolkit().getClass().getResource("/spartan/Images/" + value + "blue.png"));
-            Image img3 = img2.getImage().getScaledInstance((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() / 24, (int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() / 24, Image.SCALE_SMOOTH);
+            Image img3 = img2.getImage().getScaledInstance((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() / 24, (int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() / 24, Image.SCALE_SMOOTH);// set the size depense on the screen size 
             this.back = new ImageIcon(img1);
             this.front = new ImageIcon(img3);
         } else {
             ImageIcon img0 = new ImageIcon(Toolkit.getDefaultToolkit().getClass().getResource("/spartan/Images/red.png"));
-            Image img1 = img0.getImage().getScaledInstance((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() / 24, (int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() / 24, Image.SCALE_SMOOTH);
+            Image img1 = img0.getImage().getScaledInstance((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() / 24, (int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() / 24, Image.SCALE_SMOOTH);// set the size depense on the screen size 
             ImageIcon img2 = new ImageIcon(Toolkit.getDefaultToolkit().getClass().getResource("/spartan/Images/" + value + "red.png"));
-            Image img3 = img2.getImage().getScaledInstance((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() / 24, (int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() / 24, Image.SCALE_SMOOTH);
+            Image img3 = img2.getImage().getScaledInstance((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() / 24, (int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() / 24, Image.SCALE_SMOOTH);// set the size depense on the screen size 
             this.back = new ImageIcon(img1);
             this.front = new ImageIcon(img3);
         }
@@ -87,25 +91,5 @@ public abstract class Pawn implements Serializable {
         flipped = side;
     }
 
-    public abstract List<Move> calculateValidMoves(final Board board);//TODO 3 moves rule.
-
-    /*/
-    public enum Pawntype{
-      SCOUT("S"),
-      NORMALPAWN("N"),
-      BOMB("B"),
-      FLAG("F");
-
-      private String pawnName;
-      
-      Pawntype(final String pawnName){
-          this.pawnName = pawnName;
-      }
-      
-      public String toSting(){
-          return this.pawnName;
-          
-      }
-        
-    }/*/
+    public abstract List<Move> calculateValidMoves(final Board board);// calculate all the valid moves for this pawn.
 }

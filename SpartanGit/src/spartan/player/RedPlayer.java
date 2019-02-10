@@ -10,7 +10,7 @@ import spartan.pieces.StackPawns;
 
 /**
  *
- * @author user
+ * @author Pantelis Ypsilanti 2962 , Odysseas Zagoras 2902 , Theodoros Mosxos 2980
  */
 public class RedPlayer extends Player implements Serializable {
 

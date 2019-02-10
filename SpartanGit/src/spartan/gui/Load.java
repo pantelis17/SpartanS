@@ -16,7 +16,7 @@ import javax.swing.JPanel;
 
 /**
  *
- * @author pante
+ * @author Pantelis Ypsilanti 2962 , Odysseas Zagoras 2902 , Theodoros Mosxos 2980
  */
 public class Load extends javax.swing.JFrame implements Runnable {
 

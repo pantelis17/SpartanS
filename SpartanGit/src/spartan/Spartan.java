@@ -8,17 +8,20 @@ package spartan;
 import spartan.gui.MainMenu;
 
 /**
- *
- * @author pante
+ *This is the main class where we start the game.
+ * 
+ * @author Pantelis Ypsilanti 2962 , Odysseas Zagoras 2902 , Theodoros Mosxos 2980
  */
 public class Spartan {
-   static MainMenu a;
+
+    static MainMenu a;// create a MainMenu item
+
     public static void main(String args[]) {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-              a=  new MainMenu();
-              a.setVisible(true);
-              a.main();
+                a = new MainMenu();//initialize this item
+                a.setVisible(true);//set the jFrame visible
+                a.main();//call the main mathod from the MainMenu class
             }
         });
     }
