@@ -1,7 +1,11 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * This class implements the Single Player Mode of the game. Is a class for the GUI and uses all the java.swing and the awt 
+ * classes. There are a lot of components . There is a JFrame and inside of it are other componets such as jPanels 
+ * jLabels , buttons and so on. Also are used images as background and a great many of layouts . The main board is seperated with 
+ * Grid Layout and border Layout (10x10) . The are ActionListeners and a timer that are used . Lots of methods are using Threadinf,
+ * Runnable . Also we use  javax.swing.SwingUtilities.updateComponentTreeUI for graphics . There is a nested class TilePanel which 
+ * contributes for a better handling of Tiles . Each TilePanel inheritates the Tile class , adding a jPanle field for the use of GUI.
+
  */
 package spartan.gui;
 
@@ -27,9 +31,9 @@ import spartan.player.RedPlayer;
 
 /**
  *
- * @author Pantelis Ypsilanti 2962 , Odysseas Zagoras 2902 , Theodoros Mosxos 2980
+ * @author user
  */
-public class SinglePlayer extends javax.swing.JFrame {
+public class SinglePlayer extends JFrame {
 
     private BluePlayer bluePlayer;
     private RedPlayer redPlayer;
@@ -57,16 +61,15 @@ public class SinglePlayer extends javax.swing.JFrame {
     boolean isClicked = false;//for start click
     boolean timeIsUp = false;
     boolean EndGame = false;
-    //  boolean PlayersTurn = true;
+
     private boolean Winner = false;
     private boolean Draw = false;
-    private JPanel scrollPane1;
-    private JScrollPane scrol;
+    private final JPanel scrollPane1;
     private MainMenu mainmenu;
     private SinglePlayer a;
 
     /**
-     * Creates new form NewJFrame
+     * Creates new foe
      */
     public SinglePlayer(Alliance alliance, MainMenu m) {
         initComponents();
@@ -83,6 +86,7 @@ public class SinglePlayer extends javax.swing.JFrame {
         MovedPawn = null;
         bluePlayer = board.getBluePlayer();
         redPlayer = board.getRedPlayer();
+        //Initiliaze of the compontes.
         Image logo = new ImageIcon(getClass().getResource("/spartan/Images/logo.png")).getImage();
         setAlwaysOnTop(true);
         setResizable(false);
@@ -101,6 +105,7 @@ public class SinglePlayer extends javax.swing.JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         jPanel1.setLayout(new GridLayout(10, 10));
         jPanel1.setBackground(new Color(0, 0, 0, 0));
+        //making the struct of the GUI.
         tiles = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
             for (int j = 0; j < 10; j++) {
@@ -137,6 +142,8 @@ public class SinglePlayer extends javax.swing.JFrame {
         } else {
             StartPane.setBackground(new Color(0, 0, 204, 255));
         }
+        
+        //Start Pane
         StartPane.setVisible(true);
         StartPane.setSize((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 2, (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 3);
         StartPane.setLocation((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 2 + 1, 0);
@@ -198,7 +205,7 @@ public class SinglePlayer extends javax.swing.JFrame {
 
         ImageIcon button = new ImageIcon(Toolkit.getDefaultToolkit().getClass().getResource("/spartan/Images/randombutton.png"));
         Image button1 = button.getImage().getScaledInstance((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 4, (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 12, Image.SCALE_SMOOTH);
-
+        //Buttons
         JButton random = new JButton("Random");
         random.setIcon(new ImageIcon(button1));
         random.setPreferredSize(new Dimension((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 5, (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 15));
@@ -333,7 +340,8 @@ public class SinglePlayer extends javax.swing.JFrame {
 
         //      MovePane.add(scroll);
         start.addActionListener(new ActionListener() {
-
+            //Timer implementation
+            
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (!isClicked) {
@@ -1242,9 +1250,7 @@ public class SinglePlayer extends javax.swing.JFrame {
                                 }
 
                             }
-                            //sourceTile = null;
-                            //destinationTile = null;
-                            //MovedPawn = null;
+                         
 
                         }
 
