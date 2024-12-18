@@ -1,12 +1,13 @@
-package spartan.player;
+package main.java.spartan.player;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Random;
-import spartan.Alliance;
-import spartan.board.Board;
-import spartan.pieces.Pawn;
-import spartan.pieces.StackPawns;
+
+import main.java.spartan.Alliance;
+import main.java.spartan.board.Board;
+import main.java.spartan.pieces.Pawn;
+import main.java.spartan.pieces.StackPawns;
 
 /**
  *

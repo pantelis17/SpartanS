@@ -1,7 +1,8 @@
-package spartan.board;
+package main.java.spartan.board;
 
 import java.io.Serializable;
-import spartan.pieces.Pawn;
+
+import main.java.spartan.pieces.Pawn;
 
 /**
  *This class contains the functions we use to handle the tiles.

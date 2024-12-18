@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package networksocket;
+package main.java.spartan.networksocket;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -21,10 +21,11 @@ import java.awt.event.MouseListener;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -40,139 +41,136 @@ import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 import static javax.swing.SwingUtilities.updateComponentTreeUI;
 import javax.swing.Timer;
-import spartan.Alliance;
-import spartan.board.Board;
-import spartan.board.Move;
-import spartan.board.Tile;
-import spartan.gui.Load;
-import spartan.gui.MainMenu;
-import spartan.gui.SinglePlayer;
-import spartan.pieces.Pawn;
-import spartan.player.BluePlayer;
-import spartan.player.MoveTransition;
-import spartan.player.RedPlayer;
+
+import main.java.spartan.Alliance;
+import main.java.spartan.board.Board;
+import main.java.spartan.board.Move;
+import main.java.spartan.board.Tile;
+import main.java.spartan.gui.Load;
+import main.java.spartan.gui.MainMenu;
+import main.java.spartan.gui.SinglePlayer;
+import main.java.spartan.pieces.Pawn;
+import main.java.spartan.player.BluePlayer;
+import main.java.spartan.player.MoveTransition;
+import main.java.spartan.player.RedPlayer;
 
 /**
- *
+ * This class contain the functions and the logic for the client on the game.
+ * 
  * @author Pantelis Ypsilanti 2962 , Odysseas Zagoras 2902 , Theodoros Mosxos 2980
  */
-public class Server extends JFrame implements Serializable {
- // variables for the GUI interface
-    private JPanel jPanel1;     
+public class Client extends JFrame implements Serializable {
+
+    private JPanel jPanel1;
     private JLabel jLabel1;
-    private BluePlayer bluePlayer;     // variable for the blue player      
-    private RedPlayer redPlayer;      //variable for the red player
-    private Board board = new Board();   // object for the bord of the game 
-    private Tile sourceTile;        // variable for the tile 
-    private Tile destinationTile; //variable for the destinationtile
-    private Pawn MovedPawn;     // variavle for the pawn 
+    private BluePlayer bluePlayer;
+    private RedPlayer redPlayer;
+    private Board board = new Board();
+    private Tile sourceTile;
+    private Tile destinationTile;
+    private Pawn MovedPawn;
     private int NumPanel;
-    private boolean Start;        //variable for the start of the game 
-    private final Alliance alliance; //variable for the alliance of the palyer
-    private JPanel StartPane;                   
-    private JPanel OpponentPane;                               //variables for the GUI interface
+    private boolean Start;
+    private final Alliance alliance;
+    private JPanel StartPane;//player hand panel
+    private JPanel OpponentPane;//opponent graveyard panel
     private JPanel MovePane;
-    ArrayList<TilePanel> tiles;           //ArrayList for the tiles 
-    ArrayList<TilePanel> tilesred;       //Arraylist for the tilew of the red palyer 
-    ArrayList<TilePanel> tilesoppent;  //Arraylist for the tilew of the opponent palyer 
-    ArrayList<JLabel> moves;      //Arraylist  for the moves
-    private int min1 = 4, sec1 = 60;    
-    private JLabel nith;      
-    private JLabel min;                    //variablew for the time
+    ArrayList<TilePanel> tiles;
+    ArrayList<TilePanel> tilesblue;//hand of the player
+    ArrayList<TilePanel> tilesoppent;//hand of the opponent
+    ArrayList<JLabel> moves;
+    private int min1 = 4, sec1 = 60;
+    private JLabel nith;
+    private JLabel min;
     private JLabel sec;
     private JLabel message;
-    private Move move;
     Timer timer;
     boolean flag = true;//for timer
     boolean isClicked = false;//for start click
     boolean timeIsUp = false;
     boolean EndGame = false;
-    //  boolean PlayersTurn = true;
-    private boolean Winner = false;           //variables that devlare the outcome of the game
+    private boolean Winner = false;
     private boolean Draw = false;
     private JPanel scrollPane1;
     private JScrollPane scrol;
-
-    //variables that are used in order to create the connection between Client-Server
+    private boolean firstRound = false;
     private ObjectInputStream in;
     private ObjectOutputStream out;
     private DataInputStream indata;
     private DataOutputStream outdata;
-    private ServerSocket server;              
     private Socket connection;
-    private static MainMenu main;
+    private MainMenu main;
     private Load load;
-    private Server ser;
+    private Move move;
 
-    public Server(MainMenu m, int port) throws IOException {  //constractor of the class 
-        initComponents();
+    public Client(MainMenu m, String ip, int port) throws IOException {
         main = m;
-        server = new ServerSocket(port);             //Initiallizing the connection from the Server , in order for the Client to connect with the Server
-        server.setSoTimeout(60000);
-        connection = server.accept();
-        main.setVisible(false);
-        out = new ObjectOutputStream(connection.getOutputStream());
-        in = new ObjectInputStream(connection.getInputStream());
-        outdata = new DataOutputStream(connection.getOutputStream());
-        indata = new DataInputStream(connection.getInputStream());
-        this.alliance = Alliance.RED;          //declaration of the server alliance
-        setTitle("Spartan");   // Title of the game
-        Start = true;                //intiallization for the begining of the game 
-        sourceTile = null;                           
-        destinationTile = null;         //Setting the tiles,pawns and coordinates into null at the beginning of trhe game
+        connection = new Socket(ip, port);//try to make connection with the server 
+        OutputStream outToServer = connection.getOutputStream();
+        out = new ObjectOutputStream(outToServer);//create new stream
+        InputStream inFromServer = connection.getInputStream();
+        in = new ObjectInputStream(inFromServer);//create new in stream
+        outdata = new DataOutputStream(connection.getOutputStream());//create new out data stream
+        indata = new DataInputStream(connection.getInputStream());//create new in data stream
+        initComponents();
+        this.alliance = Alliance.BLUE;//client is always the blue player
+        board.changeCurrentPlayer();//change the currentplayer of the board so the blue player can set his pawn on the board
+        setTitle("Spartan");
+        Start = true;
+        sourceTile = null;
+        destinationTile = null;
         MovedPawn = null;
-        bluePlayer = board.getBluePlayer();           // getting the board for the  blue palyer
-        redPlayer = board.getRedPlayer();            // getting the board for the red  palyer
-        
-        //Setting the view and sizes of the GUI components of the interface
-        
-        Image logo = new ImageIcon(getClass().getResource("/spartan/Images/logo.png")).getImage();
+        bluePlayer = board.getBluePlayer();//initialize the players
+        redPlayer = board.getRedPlayer();
+        Image logo = new ImageIcon(getClass().getResource("/main/resources/images/logo.png")).getImage();
         setAlwaysOnTop(true);
         setResizable(false);
-        Image t = new ImageIcon(getClass().getResource("/spartan/Images/cursor.png")).getImage();
+        Image t = new ImageIcon(getClass().getResource("/main/resources/images/cursor.png")).getImage();
         Toolkit toolkit = Toolkit.getDefaultToolkit();
         Cursor cursor = toolkit.createCustomCursor(t, new Point(5, 5), "Custom Cursor");
         setCursor(cursor);
         setSize((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() + 10, (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight() + 5);
         jLabel1.setSize((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth() + 30) / 2, (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight() - 10);
         jPanel1.setSize((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth() + 12) / 2, (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight() - 20);
-        ImageIcon background = new ImageIcon(Toolkit.getDefaultToolkit().getClass().getResource("/spartan/Images/map.png"));
+
+        ImageIcon background = new ImageIcon(getClass().getResource("/main/resources/images/map.png"));
         Image map = background.getImage().getScaledInstance((int) ((Toolkit.getDefaultToolkit().getScreenSize().getWidth() + 10) / 2),
                 (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight() + 10), Image.SCALE_SMOOTH);
         jLabel1.setIcon(new ImageIcon(map));
         setIconImage(logo);
-        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);//set the frame so it cant be closed
+
         jPanel1.setLayout(new GridLayout(10, 10));
-        jPanel1.setBackground(new Color(0, 0, 0, 0));
-        tiles = new ArrayList<>();     //Arraylist for the tiles of the game 
-        
-        //declaring the coordianates of the panel that the pawns can not be placed on 
+        jPanel1.setBackground(new Color(0, 0, 0, 0));// make jPanel1 transaparansy
+        tiles = new ArrayList<>();//this is the arraylist with the tiles of the board and what they contain
         for (int i = 0; i < 10; i++) {
             for (int j = 0; j < 10; j++) {
-                if (i * 10 + j == 42 || i * 10 + j == 43 || i * 10 + j == 46 || i * 10 + j == 47 || i * 10 + j == 52 || i * 10 + j == 53 || i * 10 + j == 56 || i * 10 + j == 57) {
-                    tiles.add(new TilePanel(i * 10 + j, null, 0));
+                if (i * 10 + j == 42 || i * 10 + j == 43 || i * 10 + j == 46 || i * 10 + j == 47 || i * 10 + j == 52 || i * 10 + j == 53 || i * 10 + j == 56 || i * 10 + j == 57) {//if we are in a column
+                    tiles.add(new TilePanel(i * 10 + j, null, 0));// Tilepanel is a new class which has a tile object and other informations
                     tiles.get(i * 10 + j).setLayout(new BorderLayout());
                     tiles.get(i * 10 + j).setBorder(BorderFactory.createLineBorder(Color.GRAY));
-                    tiles.get(i * 10 + j).setBackground(new Color(0, 0, 0, 50));
+                    tiles.get(i * 10 + j).setBackground(new Color(0, 0, 0, 50));//set a soft black color in this tile
+
                 } else {
                     tiles.add(new TilePanel(i * 10 + j, null, 0));
                     tiles.get(i * 10 + j).setLayout(new BorderLayout());
                     tiles.get(i * 10 + j).setBorder(BorderFactory.createLineBorder(Color.GRAY));
                     tiles.get(i * 10 + j).setBackground(new Color(0, 0, 0, 0));
                 }
-                jPanel1.add(tiles.get(i * 10 + j));
             }
         }
+        for (int i = 99; i >= 0; i--) {//because client is a blue player we load the tiles on in jPanel up side down so we can watch from the lower side of the board
+            jPanel1.add(tiles.get(i));
+        }
         jPanel1.revalidate();
-        jPanel1.repaint();           
-        setLocation(-3, 0);                //preaparing the panel
+        jPanel1.repaint();
+        setLocation(-3, 0);
         StartPane = new JPanel();
         if (!alliance.isBlue()) {
-            StartPane.setBackground(new Color(204, 0, 0, 255));       //declaring the colour ,according to the players choice
+            StartPane.setBackground(new Color(204, 0, 0, 255));//make it red
         } else {
-            StartPane.setBackground(new Color(0, 0, 204, 255));
+            StartPane.setBackground(new Color(0, 0, 204, 255));// make it blue
         }
-         //Setting the components  of the GUI ,of the interface
         StartPane.setVisible(true);
         StartPane.setSize((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 2, (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 3);
         StartPane.setLocation((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 2 + 1, 0);
@@ -180,31 +178,30 @@ public class Server extends JFrame implements Serializable {
         JButton start = new JButton("Start");
         start.setEnabled(false);
         start.setPreferredSize(new Dimension(80, 80));
-        tilesred = new ArrayList<>();   // ArrayList of the tiles of the red player
+        tilesblue = new ArrayList<>();
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 10; j++) {
-                if (!alliance.isBlue()) {            //creating the coordinates for the pawns of the red player 
-                    tilesred.add(new TilePanel(i * 10 + j, this.redPlayer.getPawnOfStack(i * 10 + j), 1));
+                if (!alliance.isBlue()) {// this part will be used later if we decide to make the client to can be red player too
+                    tilesblue.add(new TilePanel(i * 10 + j, this.redPlayer.getPawnOfStack(i * 10 + j), 1));
                     this.redPlayer.setCordinateofPawn(i * 10 + j, (i * 10 + j + 1) * (-1), 1, !isClicked);
-                    tilesred.get(i * 10 + j).setLayout(new BorderLayout());
-                    tilesred.get(i * 10 + j).setBorder(BorderFactory.createLineBorder(Color.GRAY));
+                    tilesblue.get(i * 10 + j).setLayout(new BorderLayout());
+                    tilesblue.get(i * 10 + j).setBorder(BorderFactory.createLineBorder(Color.GRAY));
                     this.redPlayer.getPawnOfStack(i * 10 + j).setSide(true);
-                    tilesred.get(i * 10 + j).add(new JLabel(this.redPlayer.getPawnOfStack(i * 10 + j).getImage()));
-                    tilesred.get(i * 10 + j).setBackground(new Color(0, 0, 0, 0));
-                } else {      //creating the coordinates for the pawns of the blue player 
-                    tilesred.add(new TilePanel(i * 10 + j, this.bluePlayer.getPawnOfStack(i * 10 + j), 1));
+                    tilesblue.get(i * 10 + j).add(new JLabel(this.redPlayer.getPawnOfStack(i * 10 + j).getImage()));
+                    tilesblue.get(i * 10 + j).setBackground(new Color(0, 0, 0, 0));
+                } else {// for now 
+                    tilesblue.add(new TilePanel(i * 10 + j, this.bluePlayer.getPawnOfStack(i * 10 + j), 1));//add new Tile panels with the pawns of the blue's hand
                     this.bluePlayer.setCordinateofPawn(i * 10 + j, (i * 10 + j + 1) * (-1), 1, !isClicked);
-                    tilesred.get(i * 10 + j).setLayout(new BorderLayout());
-                    tilesred.get(i * 10 + j).setBorder(BorderFactory.createLineBorder(Color.GRAY));
+                    tilesblue.get(i * 10 + j).setLayout(new BorderLayout());
+                    tilesblue.get(i * 10 + j).setBorder(BorderFactory.createLineBorder(Color.GRAY));
                     this.bluePlayer.getPawnOfStack(i * 10 + j).setSide(true);
 
-                    tilesred.get(i * 10 + j).add(new JLabel(this.bluePlayer.getPawnOfStack(i * 10 + j).getImage()));
-                    tilesred.get(i * 10 + j).setBackground(new Color(0, 0, 0, 0));
+                    tilesblue.get(i * 10 + j).add(new JLabel(this.bluePlayer.getPawnOfStack(i * 10 + j).getImage()));
+                    tilesblue.get(i * 10 + j).setBackground(new Color(0, 0, 0, 0));
                 }
-                StartPane.add(tilesred.get(i * 10 + j));
+                StartPane.add(tilesblue.get(i * 10 + j));
             }
         }
-        //Setting the componets of the GUI ,acoording to the palyer ,red or blue
         start.setEnabled(true);
         OpponentPane = new JPanel();
         if (!alliance.isBlue()) {
@@ -213,7 +210,6 @@ public class Server extends JFrame implements Serializable {
             OpponentPane.setBackground(new Color(204, 0, 0, 255));
         }
 
-        //Setting the sizes of the componets of the interface
         OpponentPane.setVisible(true);
         OpponentPane.setSize((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 2, (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 3);
         OpponentPane.setLocation((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 2 + 1, (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 3);
@@ -234,97 +230,97 @@ public class Server extends JFrame implements Serializable {
         OptionPane.setSize((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 4, (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 3);
         OptionPane.setLocation((int) ((Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 2 + (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 4 + 1), (int) ((Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 3) * 2);
 
-        // Declaring the componets of the buttons of the interface
-        ImageIcon button = new ImageIcon(Toolkit.getDefaultToolkit().getClass().getResource("/spartan/Images/randombutton.png"));
+        ImageIcon button = new ImageIcon(getClass().getResource("/main/resources/images/randombutton.png"));
         Image button1 = button.getImage().getScaledInstance((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 4, (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 12, Image.SCALE_SMOOTH);
 
-        JButton random = new JButton("Random");      //the random button 
+        JButton random = new JButton("Random");
         random.setIcon(new ImageIcon(button1));
         random.setPreferredSize(new Dimension((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 5, (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 15));
         random.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e) {      //Action listener for the button 
+            public void actionPerformed(ActionEvent e) {
                 if (!isClicked || timeIsUp) {
-                    return;
+                    return;//is the player hasnt press the start or if time is up for the board set do nothing
                 }
                 try {
-                    Random(alliance);
+                    Random(alliance);//call the random and create a random set of your pawn in the board
                 } catch (IOException ex) {
-                    Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (ClassNotFoundException ex) {
+                    Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         });
 
-        JButton exit = new JButton("Exit");     //the exit button    
+        JButton exit = new JButton("Exit");
 
-        ImageIcon button4 = new ImageIcon(Toolkit.getDefaultToolkit().getClass().getResource("/spartan/Images/exitbutton.png"));
+        ImageIcon button4 = new ImageIcon(getClass().getResource("/main/resources/images/exitbutton.png"));
         Image button5 = button4.getImage().getScaledInstance((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 4, (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 12, Image.SCALE_SMOOTH);
         exit.setIcon(new ImageIcon(button5));
         exit.setPreferredSize(new Dimension((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 5, (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 15));
         exit.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e) {    //Action listener for the button 
+            public void actionPerformed(ActionEvent e) {
+
+                if (isClicked) {//is the player has already press the start button
+                    timer.stop();
+                }
+
                 try {
-                    Close();
+                    Close();//close the connection and everything else we need to close
                 } catch (Exception ex) {
                     Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                main.setVisible(true);
+                main.setVisible(true);//bring back the menu
                 getThisJFrame().dispose();
 
             }
         });
 
-        JButton help = new JButton("Help");    //the help button 
+        JButton help = new JButton("Help");
 
-        ImageIcon button6 = new ImageIcon(Toolkit.getDefaultToolkit().getClass().getResource("/spartan/Images/helpbutton.png"));
+        ImageIcon button6 = new ImageIcon(getClass().getResource("/main/resources/images/helpbutton.png"));
         Image button7 = button6.getImage().getScaledInstance((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 4, (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 12, Image.SCALE_SMOOTH);
         help.setIcon(new ImageIcon(button7));
         help.setPreferredSize(new Dimension((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 5, (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 15));
         help.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e) {          //Action listener for the button 
-                
-                //   getting the board and coordinates for the blue player pawns 
-                if ((board.getCurrentPlayer().getAlliance().isBlue() == alliance.isBlue()) && !Start) {
-                    Move move = board.getCurrentPlayer().BotMove(board.getGameBoard());
-                    tiles.get(move.getCurrentCoordinate()).setBackground(new Color(255, 0, 0, 50));
+            public void actionPerformed(ActionEvent e) {
+                if ((board.getCurrentPlayer().getAlliance().isBlue() == alliance.isBlue()) && !Start) {//can activate this button only when we are in the main game and its the blue player turn
+                    Move move = board.getCurrentPlayer().BotMove(board.getGameBoard());//choose a random move 
+                    tiles.get(move.getCurrentCoordinate()).setBackground(new Color(255, 0, 0, 50));//change the color so the player can see it
                     tiles.get(move.getDestinationCoordinate()).setBackground(new Color(255, 0, 0, 50));
-                    jPanel1.removeAll();
-                    for (final TilePanel boardTile : tiles) {
-                        if (boardTile.getPos() != move.getCurrentCoordinate() && boardTile.getPos() != move.getDestinationCoordinate()) {
-                            boardTile.drawTile();
+                    jPanel1.removeAll();//refresh the jPanel
+                    for (int i = 99; i >= 0; i--) {
+                        if (tiles.get(i).getPos() != move.getCurrentCoordinate() && tiles.get(i).getPos() != move.getDestinationCoordinate()) {
+                            tiles.get(i).drawTile();
                         }
-                        jPanel1.add(boardTile);
+                        jPanel1.add(tiles.get(i));
                     }
                     jPanel1.validate();
                     jPanel1.repaint();
-                    updateComponentTreeUI(getThisJFrame());      //updating the board
+                    updateComponentTreeUI(getThisJFrame());
 
                 }
             }
         });
-        //declaring componets of the GUI
         scrollPane1 = new JPanel();
         scrollPane1.setLocation((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 2, (int) ((Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 3) * 2 + (int) ((Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 10));
         scrollPane1.setBackground(Color.yellow);
         scrollPane1.setSize((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 4, (int) ((Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 3) * 2 + (int) ((Toolkit.getDefaultToolkit().getScreenSize().getHeight())));
-        // scrollPane1.setLayout();
-        moves = new ArrayList<>();       //ArraList for the moves 
+        moves = new ArrayList<>();
         OptionPane.add(random);
         OptionPane.add(help);
         OptionPane.add(exit);
-
-        //declaring the components of time between the moves of the players and the veiew of the moves and turns of every player
         MovePane = new JPanel();
         MovePane.setBackground(Color.DARK_GRAY);
         MovePane.setVisible(true);
         MovePane.setSize((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 4, (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 10);
         MovePane.setLocation((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 2 + 1, (int) ((Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 3) * 2);
-        min = new JLabel("0" + (min1 + 1));
+        min = new JLabel("0" + (min1 + 1));//create the timer variables
         sec = new JLabel("0" + (sec1 - 60));
         nith = new JLabel(":");
-        if ((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() > 1500) {
+        if ((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() > 1500) {//initialiaze the size of the fond depense the size of the screen
             nith.setFont(new Font("Serif", Font.BOLD, 30));
             min.setFont(new Font("Serif", Font.BOLD, 30));
             sec.setFont(new Font("Serif", Font.BOLD, 30));
@@ -334,7 +330,7 @@ public class Server extends JFrame implements Serializable {
             nith.setFont(new Font("Serif", Font.BOLD, 20));
             min.setFont(new Font("Serif", Font.BOLD, 20));
             sec.setFont(new Font("Serif", Font.BOLD, 20));
-            message = new JLabel(" Your Turn  ");
+            message = new JLabel(" Your Turn => ");
             message.setFont(new Font("Serif", Font.BOLD, 20));
         }
         nith.setPreferredSize(new Dimension(23, 23));
@@ -350,110 +346,121 @@ public class Server extends JFrame implements Serializable {
         min.setForeground(Color.WHITE);
         nith.setForeground(Color.WHITE);
         message.setForeground(Color.WHITE);
-
-        //      MovePane.add(scroll);
-        start.addActionListener(new ActionListener() {      
-
+        start.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e) {     //Action listener for the start of the game 
+            public void actionPerformed(ActionEvent e) {
                 if (!isClicked) {
                     start.setEnabled(false);
                     try {
                         outdata.writeBoolean(true);
                     } catch (IOException ex) {
-                        Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
                     }
                     try {
                         isClicked = (boolean) indata.readBoolean();
                     } catch (IOException ex) {
-                        Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                    start.setText("Ready");       // ready button 
+                    start.setText("Ready");
                     timer = new Timer(1000, new ActionListener() {
-                        @Override
-                        public void actionPerformed(ActionEvent e) {    
-                            if (board.boardFull(alliance)) {
-                                start.setEnabled(true);               //declaring the beginning of the game
-                                start.setBackground(Color.green);
 
+                        @Override
+                        public void actionPerformed(ActionEvent e) {//that actions are done every second
+                            if (board.boardFull(alliance)) {//check if every pawn is set
+                                start.setEnabled(true);//if yes activate the ready choise button
+                                start.setBackground(Color.green);
                             } else {
                                 start.setEnabled(false);
                             }
                             sec.setForeground(Color.WHITE);
                             min.setForeground(Color.WHITE);
-                            nith.setForeground(Color.WHITE);           //cpmponents of GUI of time
+                            nith.setForeground(Color.WHITE);
                             message.setForeground(Color.WHITE);
-                            if (sec1 == 0) {
+                            if (sec1 == 0) {//when the seconds ready the zero
                                 sec1 = 60;
                                 min1--;
-
                             }
 
-                            if (min1 < 0) {    //Declaration of the game according to the time  restrictions
-                                //TODO more
-                                // timeIsUp = true;
+                            if (min1 < 0) {//if the minites are less than 0 then time is up
                                 if (!board.boardFull(alliance) && Start) {
                                     try {
-                                        Random(alliance);                //if the player has not placed all the pawns until the time
-                                                                        //is over ,the rest of the pawns are placed automatically in random order
+                                        Random(alliance);
                                     } catch (IOException ex) {
-                                        Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+                                        Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+                                    } catch (ClassNotFoundException ex) {
+                                        Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
                                     }
                                 }
-
                                 if (Start) {
                                     start.setEnabled(false);
                                     try {
-                                        Random(Alliance.BLUE);
-                                        out.writeObject(redPlayer.getActivePawns());
-
+                                        out.writeObject(bluePlayer.getActivePawns());// send the final set of the board to the opponent
+                                        Random(Alliance.RED);//initialize the opponent set on the board
                                     } catch (IOException ex) {
+                                        Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+                                    } catch (ClassNotFoundException ex) {
                                         Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
                                     }
                                     timeIsUp = true;
                                     min1 = 1;
-                                    sec1 = 60;                                        
+                                    sec1 = 60;
                                     min.setText("0" + (min1 + 1));
                                     sec.setText("0" + (sec1 - 60));
-                                    message.setText("Your Turn =>");
+                                    message.setText("Opponent Turn =>");
                                     MovePane.remove(start);
-                                    Start = false;
 
+                                    Start = false;
                                     timer.start();
-                                    GamePlay();              //palying the  game 
+
+                                    GamePlay();//update the valid moves of the players and check if we have reach in the end of the game
+                                    board.changeCurrentPlayer();//change the current player because red must play first
+                                    firstRound = true;
+
                                 } else {
-                                    EndGame = true;             //when the game will be over 
-                                    //MovePane.setVisible(false);
+
+                                    EndGame = true;//if time is up then someone have lose because he didnt make a move
                                     timer.stop();
-                                    if (board.getCurrentPlayer().getAlliance().isBlue() == alliance.isBlue()) {  //if your timeis up you lose the game automatically
+
+                                    if (board.getCurrentPlayer().getAlliance().isBlue() == alliance.isBlue()) {//if it was  blue player's turn
                                         JOptionPane.showMessageDialog(getThisJFrame(), "You Lose.... Time is up", "END GAME", JOptionPane.INFORMATION_MESSAGE);
                                         updateComponentTreeUI(getThisJFrame());
 
-                                    } else {     //in caser one of the palyers is the winner 
+                                    } else {//if it was red player's turn
                                         JOptionPane.showMessageDialog(getThisJFrame(), "You Win!! Time is up for the opponent.", "END GAME", JOptionPane.INFORMATION_MESSAGE);
                                         updateComponentTreeUI(getThisJFrame());
-
                                     }
                                 }
-                            } else {  //   exchange of data bewteen the players 
-                                if (!Start) {
-                                    if (board.getCurrentPlayer().getAlliance().isBlue() == alliance.isBlue()) {
+                            } else {
+                                if (!Start) {//if we are in the main game 
+                                    if (firstRound) {//if we are in the first turn
                                         try {
-                                            outdata.writeInt(0);
-                                        } catch (IOException ex) {
-                                            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
-                                        }
-                                    } else {
-                                        try {
-                                            if (indata.readInt() != 0) {
-                                                OpponentMove();
+                                            if (indata.readInt() == 0) {//if the input data is 0 the do nothing
+                                            } else {
+                                                firstRound = false;
+                                                OpponentMove();//opponent has just send his move. go to execute it
                                             }
                                         } catch (IOException ex) {
                                             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
                                         } catch (ClassNotFoundException ex) {
                                             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
-                                        } catch (InterruptedException ex) {
-                                            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+                                        }
+                                    } else {
+                                        if (board.getCurrentPlayer().getAlliance().isBlue() == alliance.isBlue()) {
+                                            try {
+                                                outdata.writeInt(0);// send a 0 every second in your turn until you make a move
+                                            } catch (IOException ex) {
+                                                Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+                                            }
+                                        } else {
+                                            try {
+                                                if (indata.readInt() != 0) {//when the indata wont be 0 go to make the opponent move
+                                                    OpponentMove();
+                                                }
+                                            } catch (IOException ex) {
+                                                Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+                                            } catch (ClassNotFoundException ex) {
+                                                Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+                                            }
                                         }
                                     }
                                 }
@@ -465,7 +472,7 @@ public class Server extends JFrame implements Serializable {
                                 if (min1 < 10) {
                                     min.setText("0" + min1);
                                     if (sec1 < 10) {
-                                        sec.setText("0" + sec1);           //setting time componets  
+                                        sec.setText("0" + sec1);
                                     } else {
                                         sec.setText("" + sec1);
                                     }
@@ -477,486 +484,47 @@ public class Server extends JFrame implements Serializable {
                                 }
                             }
                         }
+
                     });
                     timer.start();
-                } else {
+                } else {// when the player click ready 
                     start.setEnabled(false);
                     try {
-                        Random(Alliance.BLUE);
-                        out.writeObject(redPlayer.getActivePawns());
-
+                        out.writeObject(bluePlayer.getActivePawns());//set the arraylist with the active pawns with their final cordinates
+                        Random(Alliance.RED);//take the opponent hand 
                     } catch (IOException ex) {
+                        Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (ClassNotFoundException ex) {
                         Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
                     }
                     timeIsUp = true;
                     min1 = 1;
                     sec1 = 60;
                     min.setText("0" + (min1 + 1));
-                    sec.setText("0" + (sec1 - 60));                        //setting time componets  
-                    message.setText("Your Turn =>");
+                    sec.setText("0" + (sec1 - 60));
+                    message.setText("Opponent Turn =>");
                     MovePane.remove(start);
+
                     Start = false;
-
                     timer.start();
-                    GamePlay();                      //game process
 
+                    GamePlay();// update the legal moves and check if we have a winner
+                    board.changeCurrentPlayer();// change the current player
+                    firstRound = true;
                 }
             }
         });
+
         add(MovePane);
         add(StartPane);
         add(OpponentPane);
         add(OptionPane);
         add(scrollPane1);
-    }
 
-    private void Random(Alliance a) throws IOException {  //method that sets the pawns of the player in random order ,on the board 
-        ArrayList<Pawn> rand = new ArrayList<>();  //Arraylist of the random order of pawns 
-        int min, max;
-        if (!a.isBlue()) {
-            rand = redPlayer.Random();    //random orde for the red player 
-            min = 60;
-            max = 100;
-            StartPane.removeAll();
-            for (int i = 0; i < 40; i++) {
-                tilesred.set(i, new TilePanel(i, null, 1));     //settring the ramdon ordered pawns ,in specific palces on the board
-            }
-            for (final TilePanel boardTile : tilesred) {
-                StartPane.add(boardTile);
-            }
-            StartPane.validate();
-            StartPane.repaint();            //updating the board
-            StartPane.updateUI();
-        } else {
-            try {
-                rand = (ArrayList<Pawn>) in.readObject();     
-
-                for (Pawn pawn : rand) {
-                    pawn.setSide(false);
-                }                                    
-                bluePlayer.setStack(rand);
-                for (Pawn pawn : rand) {                 //Setting the pawns in their board position 
-                    this.board.setPawnOnBoard(pawn.getPositionOfPawn(), pawn);
-                }
-            } catch (ClassNotFoundException ex) {
-                Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            min = 0;
-            max = 40;
-        }
-
-        jPanel1.removeAll();
-        for (int i = min; i < max; i++) {            //calculations in order o place the pawns in specific palces on the board 
-            tiles.remove(rand.get(i - min).getPositionOfPawn());
-            tiles.add(rand.get(i - min).getPositionOfPawn(), new TilePanel(rand.get(i - min).getPositionOfPawn(), rand.get(i - min), 0));
-            tiles.get(rand.get(i - min).getPositionOfPawn()).add(new JLabel(rand.get(i - min).getImage()));
-        }
-        for (final TilePanel boardTile : tiles) {
-            jPanel1.add(boardTile);
-        }
-        jPanel1.validate();
-        jPanel1.repaint();                     //Updating the board
-        jPanel1.updateUI();
-        updateComponentTreeUI(getThisJFrame());
-    }
-
-    private Runnable waitfor() throws InterruptedException { //a runnable method that creates a time thread 
-        Thread.sleep((long) 5000);
-        return null;
-    }
-
-    //a method that declares the moves of the opponent 
-    private void OpponentMove() throws IOException, ClassNotFoundException, InterruptedException {
-        // board.changeCurrentPlayer();
-        GamePlay();      
-        //declaring the way that the oppponent player will react 
-        
-        final Move move = (Move) in.readObject();
-        final MoveTransition transition = board.getCurrentPlayer().makeMove(move);
-        board = transition.getToBoard();                                  
-        TilePanel temp = tiles.get(move.getDestinationCoordinate());
-        if (temp.getPawn() == null) {
-            tiles.remove(move.getDestinationCoordinate());
-            tiles.add(move.getDestinationCoordinate(), new TilePanel(move.getDestinationCoordinate(), move.getPawn(), 0));
-        } else {
-            Pawn winner = board.Conflict(move.getPawn(), temp.getPawn());
-            move.getPawn().setSide(true);
-            temp.getPawn().setSide(true);
-            if (winner == null) {
-                tiles.remove(move.getDestinationCoordinate());
-                tiles.add(move.getDestinationCoordinate(), new TilePanel(move.getDestinationCoordinate(), null, 0));
-                board.getCurrentPlayer().getOpponent().DeletePawn(temp.getPawn());
-                board.getCurrentPlayer().DeletePawn(move.getPawn());
-                OpponentPane.removeAll();
-                int k = move.getPawn().getTablePos();
-                tilesoppent.set(k, new TilePanel(k, move.getPawn(), 1));
-                tilesoppent.get(k).add(new JLabel(move.getPawn().getImage()));
-                for (final TilePanel boardTile : tilesoppent) {
-                    if (boardTile.getPos() == k) {
-                        OpponentPane.add(boardTile);
-                    } else {                                
-                        boardTile.drawTile();
-                        OpponentPane.add(boardTile);
-                    }
-
-                }
-                OpponentPane.validate();                   //Updating the board 
-                OpponentPane.updateUI();
-                updateComponentTreeUI(getThisJFrame());
-
-                StartPane.removeAll();
-                int i = temp.getPawn().getTablePos();
-
-                tilesred.set(i, new TilePanel(i, temp.getPawn(), 1));
-                tilesred.get(i).add(new JLabel(temp.getPawn().getImage()));        //setting and getting the red pawns 
-                for (final TilePanel boardTile : tilesred) {
-                    if (boardTile.getPos() == i) {
-                        temp.getPawn().setCordinateOfPawn(-1);
-                        StartPane.add(boardTile);
-                    } else {
-                        boardTile.drawTile();
-                    }                                       //declaring the componets of the interface
-                    StartPane.add(boardTile);
-                }
-                StartPane.validate();
-                StartPane.updateUI();                     //updating the board
-                updateComponentTreeUI(getThisJFrame());
-
-            } else if (winner == move.getPawn()) {
-                tiles.remove(move.getDestinationCoordinate());
-                tiles.add(move.getDestinationCoordinate(), new TilePanel(move.getDestinationCoordinate(), move.getPawn(), 0));
-                board.getCurrentPlayer().getOpponent().DeletePawn(temp.getPawn());
-                StartPane.removeAll();
-                int i = temp.getPawn().getTablePos();
-                tilesred.set(i, new TilePanel(i, temp.getPawn(), 1));               //setting and getting the red pawns 
-                tilesred.get(i).add(new JLabel(temp.getPawn().getImage()));
-                for (final TilePanel boardTile : tilesred) {
-                    if (boardTile.getPos() == i) {
-                        temp.getPawn().setCordinateOfPawn(-1);
-                        StartPane.add(boardTile);
-                    } else {                                                 //declaring the componets of the interface
-                        boardTile.drawTile();
-                        StartPane.add(boardTile);
-                    }
-                }
-                StartPane.validate();
-                StartPane.updateUI();                                      //updating the board
-                updateComponentTreeUI(getThisJFrame());
-
-            } else {
-                tiles.remove(move.getDestinationCoordinate());
-                tiles.add(move.getDestinationCoordinate(), new TilePanel(move.getDestinationCoordinate(), temp.getPawn(), 0));
-                board.getCurrentPlayer().DeletePawn(move.getPawn());
-                OpponentPane.removeAll();
-                int k = move.getPawn().getTablePos();
-                tilesoppent.set(k, new TilePanel(k, move.getPawn(), 1));
-                tilesoppent.get(k).add(new JLabel(move.getPawn().getImage()));
-                for (final TilePanel boardTile : tilesoppent) {
-                    if (boardTile.getPos() == k) {
-                        //          move.getPawn().setCordinateOfPawn(-1);
-                        OpponentPane.add(boardTile);
-                    } else {
-                        boardTile.drawTile();
-                        OpponentPane.add(boardTile);
-
-                    }
-                }
-                OpponentPane.validate();
-                OpponentPane.updateUI();                             //updating the board
-                updateComponentTreeUI(getThisJFrame());
-
-            }
-            if (temp.getPawn().getValue() == -1) {
-                EndGame = true;                       //end of the game 
-                Winner = false;
-
-            }
-        }
-
-        SwingUtilities.invokeLater(new Runnable() {     //method that interact with the Client-Server communication 
-            @Override
-            public void run() {
-                try {
-                    drawBoard(move.getCurrentCoordinate(), move.getDestinationCoordinate(), 0, false);
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(SinglePlayer.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (IOException ex) {
-                    Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (ClassNotFoundException ex) {
-                    Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                board.toStringBoard();
-                board.changeCurrentPlayer();       //swap between palyers turns 
-                GamePlay();
-
-            }
-        });
-    }
-
-    //method that is in charfe of updating the move transitions between the players ,in every turn 
-    private void drawBoard(int a, int b, int numPanel, boolean swap) throws InterruptedException, IOException, ClassNotFoundException {
-
-        
-        //declaring the componets of the interface  for the moves 
-        if (!Start) {
-            scrollPane1.removeAll();
-            if ((board.getCurrentPlayer().getAlliance().isBlue() == alliance.isBlue())) {
-                String s = new String("You: From " + (a + 1) + " To " + (b + 1) + "            ");
-                JLabel tem = new JLabel(s);
-                tem.setForeground(Color.RED);
-                if ((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() < 1500) {
-                    tem.setFont(new Font("Serif", Font.BOLD, 13));
-                } else {
-                    tem.setFont(new Font("Serif", Font.BOLD, 18));
-                }
-                moves.add(0, tem);
-            } else {
-                String s = new String("Opponent: From " + (a + 1) + " To " + (b + 1) + "         ");
-                JLabel tem = new JLabel(s);
-                tem.setForeground(Color.BLUE);
-                if ((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() < 1500) {
-                    tem.setFont(new Font("Serif", Font.BOLD, 13));
-                } else {
-                    tem.setFont(new Font("Serif", Font.BOLD, 18));
-                }
-                moves.add(0, tem);
-            }
-            for (JLabel temp : moves) {
-                scrollPane1.add(temp);
-            }
-            scrollPane1.validate();
-            scrollPane1.repaint();               //updating the panel 
-            scrollPane1.updateUI();
-            updateComponentTreeUI(this);
-
-        }
-        if (numPanel == 1) {
-            StartPane.remove(a);
-            StartPane.add(new TilePanel(a, null, 1), a);          //setting the pawns on panel 
-            tilesred.set(a, new TilePanel(a, null, 1));
-            StartPane.validate();
-            StartPane.repaint();                          //updating the panel 
-            StartPane.updateUI();              
-        } else {
-            if (!swap) {
-                tiles.set(a, new TilePanel(a, null, 0));
-                board.setPawnOnBoard(a, null);                    //setting the pawns on panel 
-                if(tiles.get(b).getPawn() == null){
-                    //System.out.println("mpika gia null");
-                    board.setPawnOnBoard(b, null);
-                }
-            } else {
-                board.toStringBoard();
-            }
-        }
-        jPanel1.removeAll();     //removes the pawns 
-        for (final TilePanel boardTile : tiles) {
-            if (!swap) {
-                if (boardTile.getPos() == b || boardTile.getPos() == a) {
-                    if (boardTile.getPawn() != null) {
-                        boardTile.add(new JLabel(boardTile.getPawn().getImage()));
-                        if (boardTile.getPos() == b) {
-                            boardTile.getTile().getPawn().setCordinateOfPawn(b);
-                            board.setPawnOnBoard(b, boardTile.getPawn());
-
-                        } else {                                                         //declaring componets of the position and the board 
-                            boardTile.getTile().getPawn().setCordinateOfPawn(a);
-                            board.setPawnOnBoard(a, boardTile.getPawn());
-                        }
-                    }
-                } else {
-                    boardTile.drawTile();
-                }
-                jPanel1.add(boardTile);
-                jPanel1.validate();
-                jPanel1.updateUI();                      //updating the board
-                updateComponentTreeUI(this);
-            } else {
-                if (boardTile.getPos() == b || boardTile.getPos() == a) {
-                    if (boardTile.getPawn() != null) {
-                        boardTile.add(new JLabel(boardTile.getPawn().getImage()));
-                        if (boardTile.getPos() == b) {
-                            boardTile.getTile().getPawn().setCordinateOfPawn(b);      //declaring componets of the position and the board 
-                            board.setPawnOnBoard(b, boardTile.getPawn());
-
-                        } else {
-                            boardTile.getTile().getPawn().setCordinateOfPawn(a);
-                            board.setPawnOnBoard(a, boardTile.getPawn());
-                        }
-                    }
-                } else {
-                    boardTile.drawTile();
-                }
-                jPanel1.add(boardTile);
-            }
-        }
-        jPanel1.validate();               //updating the board
-        jPanel1.updateUI();
-        updateComponentTreeUI(this);
-
-        if (!Start) {         //declaring colour components 
-            GamePlay();
-            if (board.getCurrentPlayer().getAlliance().isBlue()) {
-                tiles.get(a).setBackground(new Color(0, 255, 0, 50));
-                tiles.get(a).setBorder(BorderFactory.createLineBorder(Color.RED));
-                tiles.get(b).setBackground(new Color(0, 255, 0, 50));
-                tiles.get(b).setBorder(BorderFactory.createLineBorder(Color.RED));
-                CheckEnd();
-            }
-
-        }
-    }
-
-    private JFrame getThisJFrame() {  //getter method for the JFrame 
-        return this;
-    }
-
-    private void setCurrentMove(Move move) {    //setter method for the current move 
-        this.move = move;
-    }
-
-    private void highlightStartTiles() {      //method that highliths the pawns with a clour 
-        if (alliance.isBlue()) {     //for the blue player pawns 
-            for (int i = 0; i < 40; i++) {
-                if (!board.getTile(i).isTileOccupied()) {
-                    tiles.get(i).setBackground(new Color(0, 0, 204, 50));
-                }
-            }
-        } else {      //for the red palyer pawns 
-            for (int i = 60; i < 100; i++) {
-                if (!board.getTile(i).isTileOccupied()) {
-                    tiles.get(i).setBackground(new Color(204, 0, 0, 50));
-                }
-            }
-        }
-        jPanel1.validate();
-        jPanel1.updateUI();          //updating the board
-        updateComponentTreeUI(this);
-
-    }
-
-    private void drawStartPanel(int a, int b, final Pawn pawn, int p) { //method that declares the start panel of the palyers 
-        if (p == 1) {
-            tilesred.set(a, new TilePanel(a, null, 1)); 
-            StartPane.remove(a);                        //transition from the startt panel  
-            StartPane.add(tilesred.get(a), a);
-
-            StartPane.validate();
-            StartPane.repaint();                  //updating the board
-            StartPane.updateUI();
-        } else if (p == 0) {
-            jPanel1.removeAll();
-            tiles.set(a, new TilePanel(a, null, 0));
-            for (final TilePanel boardTile : tiles) {
-                jPanel1.add(boardTile);                     //transition from the startt panel  to the board 
-            }
-            board.setPawnOnBoard(a, null);
-            jPanel1.validate();                  //updating the board
-            jPanel1.updateUI();
-            //    board.toStringBoard();
-        }
-        StartPane.removeAll();
-        tilesred.set(b, new TilePanel(b, pawn, 1));
-        tilesred.get(b).add(new JLabel(pawn.getImage()));
-        for (final TilePanel boardTile : tilesred) {
-            if (boardTile.getPos() == b) {                               //declaration of the way the pawn will be placed on the board
-                this.redPlayer.setCordinateofPawn(a, (b + 1) * (-1), p, !isClicked);
-                StartPane.add(boardTile);
-            } else {
-                boardTile.drawTile();
-            }
-            StartPane.add(boardTile);
-        }
-        StartPane.validate();
-        StartPane.updateUI();        //updating the board
-        updateComponentTreeUI(this);
-    }
-
-    private void CheckEnd() {    //method that declares the outcome at the end of the game 
-        if (!Start) {    // no start case 
-            GamePlay();
-            if (!(board.getCurrentPlayer().getAlliance().isBlue())) {
-                if (EndGame) {
-                    //MovePane.setVisible(false);
-                    timer.stop();
-                    if (Draw) {                     //In case of draw 
-                        JOptionPane.showMessageDialog(getThisJFrame(), "Draw", "END GAME", JOptionPane.INFORMATION_MESSAGE);
-                        updateComponentTreeUI(getThisJFrame());
-
-                    } else {            
-                        if (Winner) {          //for the winner player 
-                            JOptionPane.showMessageDialog(getThisJFrame(), "You Win", "END GAME", JOptionPane.INFORMATION_MESSAGE);
-                            updateComponentTreeUI(getThisJFrame());
-
-                        } else {        //for the loser player 
-                            JOptionPane.showMessageDialog(getThisJFrame(), "You Lose", "END GAME", JOptionPane.INFORMATION_MESSAGE);
-                            updateComponentTreeUI(getThisJFrame());
-
-                        }
-                    }
-
-                } else {
-                    min1 = 1;
-                    sec1 = 60;
-                    min.setText("0" + (min1 + 1));             //declearing time  
-                    sec.setText("0" + (sec1 - 60));
-                    message.setText("Opponent Turn => ");
-
-                    // OpponentMove();
-                }
-                //this.PlayersTurn = !this.PlayersTurn;
-            } else {
-
-                //message.setText("Your Turn");
-                //  this.PlayersTurn = !this.PlayersTurn;
-                //  GamePlay();
-                if (EndGame) {
-                    // MovePane.setVisible(false);
-                    timer.stop();
-                    if (Draw) {               //In case of draw 
-                        JOptionPane.showMessageDialog(getThisJFrame(), "Draw", "END GAME", JOptionPane.INFORMATION_MESSAGE);
-                        updateComponentTreeUI(getThisJFrame());
-
-                    } else {
-                        if (Winner) {             //for the winner player 
-                            JOptionPane.showMessageDialog(getThisJFrame(), "You Win", "END GAME", JOptionPane.INFORMATION_MESSAGE);
-                            updateComponentTreeUI(getThisJFrame());
-
-                        } else {                       //for the loser player 
-                            JOptionPane.showMessageDialog(getThisJFrame(), "You Lose", "END GAME", JOptionPane.INFORMATION_MESSAGE);
-                            updateComponentTreeUI(getThisJFrame());
-
-                        }
-                    }
-
-                } else {
-                    min1 = 1;
-                    sec1 = 60;
-                    min.setText("0" + (min1 + 1));             //declearing time  
-                    sec.setText("0" + (sec1 - 60));
-                    message.setText("Your Turn => ");
-                }
-            }
-        }
-    }
-
-    private void GamePlay() { //method that declares the flow of the game 
-        this.board.getCurrentPlayer().calculateLegalMoves(board);//.setLegalMoves(this.board.getCurrentPlayer().calculateLegalMoves(this.board.getCurrentPlayer().getActivePawns().getStack(), board));
-        this.board.getCurrentPlayer().getOpponent().calculateLegalMoves(board);//.setLegalMoves(this.board.getCurrentPlayer().getOpponent().calculateLegalMoves(this.board.getCurrentPlayer().getOpponent().getActivePawns().getStack(), board));
-        if (redPlayer.getAvailablePawns().isEmpty() && bluePlayer.getAvailablePawns().isEmpty()) {
-            Draw = true;
-            EndGame = true;
-        } else if (redPlayer.getAvailablePawns().isEmpty()) {  //in case that there are no more moves 
-            EndGame = true;
-            Winner = false;
-        } else if (bluePlayer.getAvailablePawns().isEmpty()) {
-            EndGame = true;
-            Winner = true;
-        }
     }
 
     @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">                          
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">
     private void initComponents() {
 
         // jPopupMenu1 = new javax.swing.JPopupMenu();
@@ -985,89 +553,530 @@ public class Server extends JFrame implements Serializable {
         jPanel1.setBounds(0, 0, 880, 650);
 
         jLabel1.setBackground(new java.awt.Color(204, 0, 0));
-        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/spartan/Images/map.png"))); // NOI18N
+        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/main/resources/images/map.png"))); // NOI18N
         getContentPane().add(jLabel1);
         jLabel1.setBounds(0, 0, 880, 650);
 
         pack();
-    }// </editor-fold>                        
+    }// </editor-fold>
 
-    public void Close() throws Exception {  //method that terminates the connection between the Client and the Server 
+    private JFrame getThisJFrame() {
+        return this;
+    }
+
+    private void setCurrentMove(Move move) {
+        this.move = move;
+    }
+
+    /**
+     * use this function to terminate the conection between server and client
+     * @throws IOException 
+     */
+    public void Close() throws IOException {
         if (isClicked) {
             timer.stop();
         }
         out.close();
         in.close();
-        server.close();
         connection.close();
     }
 
-    private Runnable test(int a, int b) { //  method that checks the stability o f the moves  
-        for (final TilePanel boardTile : tiles) {
-            if (boardTile.getPos() == b || boardTile.getPos() == a) {
-                if (boardTile.getPawn() != null) {
-                    boardTile.add(new JLabel(boardTile.getPawn().getImage()));
-                    if (boardTile.getPos() == b) {
-                        boardTile.getTile().getPawn().setCordinateOfPawn(b);
-                        board.setPawnOnBoard(b, boardTile.getPawn());
+    /**
+     * Update the legal moves and check if we have a winner.
+     */
+    private void GamePlay() {
+        this.board.getCurrentPlayer().calculateLegalMoves(board);
+        this.board.getCurrentPlayer().getOpponent().calculateLegalMoves(board);
+        if (redPlayer.getAvailablePawns().isEmpty() && bluePlayer.getAvailablePawns().isEmpty()) {// if both players dont have any move to make
+            Draw = true;
+            EndGame = true;
+        } else if (redPlayer.getAvailablePawns().isEmpty()) {//if red player, the opponent has no move to make
+            EndGame = true;
+
+            Winner = true;
+
+        } else if (bluePlayer.getAvailablePawns().isEmpty()) {//if blue player, you, have no moves to make
+
+            EndGame = true;
+
+            Winner = false;
+        }
+    }
+
+    /**
+     * Create random set on the board for the client or 
+     * copy the set on the board of the server, depense the alliance.
+     * 
+     * @param a is the alliance 
+     * @throws IOException
+     * @throws ClassNotFoundException 
+     */
+    private void Random(Alliance a) throws IOException, ClassNotFoundException {
+        ArrayList<Pawn> rand = new ArrayList<>();
+        int min, max;
+        if (a.isBlue()) {
+            rand = bluePlayer.Random();
+            min = 0;//the minimun position on the board
+            max = 40;//the maximun position on the board
+            StartPane.removeAll();
+            for (int i = 0; i < 40; i++) {
+                tilesblue.set(i, new TilePanel(i, null, 1));
+            }
+            for (final TilePanel boardTile : tilesblue) {
+                StartPane.add(boardTile);
+            }
+            StartPane.validate();
+            StartPane.repaint();
+            StartPane.updateUI();
+        } else {
+            rand = (ArrayList<Pawn>) in.readObject();//read the opponent arrayling 
+            for (Pawn pawn : rand) {
+                pawn.setSide(false);//set the opponent side
+            }
+            redPlayer.setStack(rand);
+
+            for (Pawn pawn : rand) {
+                this.board.setPawnOnBoard(pawn.getPositionOfPawn(), pawn);//set every pawn on the board
+            }
+            min = 60;
+            max = 100;
+        }
+
+        jPanel1.removeAll();//refresh the jPanel ( board )
+        for (int i = min; i < max; i++) {
+            tiles.remove(rand.get(i - min).getPositionOfPawn());
+            tiles.add(rand.get(i - min).getPositionOfPawn(), new TilePanel(rand.get(i - min).getPositionOfPawn(), rand.get(i - min), 0));
+            tiles.get(rand.get(i - min).getPositionOfPawn()).add(new JLabel(rand.get(i - min).getImage()));
+        }
+        for (int i = 99; i >= 0; i--) {
+            jPanel1.add(tiles.get(i));
+        }
+
+        jPanel1.validate();
+        jPanel1.repaint();
+        jPanel1.updateUI();
+        updateComponentTreeUI(getThisJFrame());
+
+    }
+
+    /**
+     * This is used to make the move of the opponent
+     * 
+     * @throws IOException
+     * @throws ClassNotFoundException 
+     */
+    private void OpponentMove() throws IOException, ClassNotFoundException {
+
+        GamePlay();//update the legal moves and check for winner
+        final Move move = (Move) in.readObject();//read the opponent move 
+        final MoveTransition transition = board.getCurrentPlayer().makeMove(move);
+        board = transition.getToBoard();//update the board
+        TilePanel temp = tiles.get(move.getDestinationCoordinate());
+        if (temp.getPawn() == null) {// update the tiles arraylist if the destination tile isnt occupied
+            tiles.remove(move.getDestinationCoordinate());
+            tiles.add(move.getDestinationCoordinate(), new TilePanel(move.getDestinationCoordinate(), move.getPawn(), 0));
+        } else {//if it is occupied
+            Pawn winner = board.Conflict(move.getPawn(), temp.getPawn());//check the winner of the conflict
+            move.getPawn().setSide(true);//make both pawns to be flipped up
+            temp.getPawn().setSide(true);
+            if (winner == null) {// if the is no winner then both go out
+                tiles.remove(move.getDestinationCoordinate());
+                tiles.add(move.getDestinationCoordinate(), new TilePanel(move.getDestinationCoordinate(), null, 0));
+                board.getCurrentPlayer().getOpponent().DeletePawn(temp.getPawn());
+                board.getCurrentPlayer().DeletePawn(move.getPawn());
+                OpponentPane.removeAll();//update the opponentPnae
+                int k = move.getPawn().getTablePos();//get the position the pawn have in the player's hand
+                tilesoppent.set(k, new TilePanel(k, move.getPawn(), 1));
+                tilesoppent.get(k).add(new JLabel(move.getPawn().getImage()));
+                for (final TilePanel boardTile : tilesoppent) {//search in the opponent hand for the pawn with talbeposition k
+                    if (boardTile.getPos() == k) {
+                        OpponentPane.add(boardTile);
                     } else {
-                        boardTile.getTile().getPawn().setCordinateOfPawn(a);
-                        board.setPawnOnBoard(a, boardTile.getPawn());
+                        boardTile.drawTile();
+                        OpponentPane.add(boardTile);
+                    }
+
+                }
+                OpponentPane.validate();
+                OpponentPane.updateUI();
+                updateComponentTreeUI(getThisJFrame());
+
+                StartPane.removeAll();//remove the pawn also from the player's hand
+                int i = temp.getPawn().getTablePos();
+
+                tilesblue.set(i, new TilePanel(i, temp.getPawn(), 1));
+                tilesblue.get(i).add(new JLabel(temp.getPawn().getImage()));
+                for (final TilePanel boardTile : tilesblue) {
+                    if (boardTile.getPos() == i) {
+                        temp.getPawn().setCordinateOfPawn(-1);
+                        StartPane.add(boardTile);
+                    } else {
+                        boardTile.drawTile();
+                    }
+                    StartPane.add(boardTile);
+                }
+                StartPane.validate();
+                StartPane.updateUI();
+                updateComponentTreeUI(getThisJFrame());
+
+            } else if (winner == move.getPawn()) {//player lose this conflict
+                tiles.remove(move.getDestinationCoordinate());//remove the pawn from the destination
+                tiles.add(move.getDestinationCoordinate(), new TilePanel(move.getDestinationCoordinate(), move.getPawn(), 0));// add the winner of the confilct there
+                board.getCurrentPlayer().getOpponent().DeletePawn(temp.getPawn());
+                StartPane.removeAll();
+                int i = temp.getPawn().getTablePos();//get the position in the hand of the player
+                tilesblue.set(i, new TilePanel(i, temp.getPawn(), 1));
+                tilesblue.get(i).add(new JLabel(temp.getPawn().getImage()));
+                for (final TilePanel boardTile : tilesblue) {
+                    if (boardTile.getPos() == i) {
+                        temp.getPawn().setCordinateOfPawn(-1);
+                        StartPane.add(boardTile);
+                    } else {
+                        boardTile.drawTile();
+                        StartPane.add(boardTile);
                     }
                 }
+                StartPane.validate();
+                StartPane.updateUI();
+                updateComponentTreeUI(getThisJFrame());
+
+            } else {//player win this conflict
+                tiles.remove(move.getDestinationCoordinate());
+                tiles.add(move.getDestinationCoordinate(), new TilePanel(move.getDestinationCoordinate(), temp.getPawn(), 0));
+                board.getCurrentPlayer().DeletePawn(move.getPawn());
+                OpponentPane.removeAll();//refresh the opponent graceyard
+                int k = move.getPawn().getTablePos();
+                tilesoppent.set(k, new TilePanel(k, move.getPawn(), 1));
+                tilesoppent.get(k).add(new JLabel(move.getPawn().getImage()));
+                for (final TilePanel boardTile : tilesoppent) {
+                    if (boardTile.getPos() == k) {
+                        OpponentPane.add(boardTile);
+                    } else {
+                        boardTile.drawTile();
+                        OpponentPane.add(boardTile);
+
+                    }
+                }
+                OpponentPane.validate();
+                OpponentPane.updateUI();
+                updateComponentTreeUI(getThisJFrame());
+
+            }
+            if (temp.getPawn().getValue() == -1) {
+                EndGame = true;
+                Winner = false;
+
+            }
+        }
+
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    drawBoard(move.getCurrentCoordinate(), move.getDestinationCoordinate(), 0, false);//update the jpanel and tiles arraylist 
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(SinglePlayer.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IOException ex) {
+                    Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (ClassNotFoundException ex) {
+                    Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                board.toStringBoard();
+                board.changeCurrentPlayer();//change turn
+                GamePlay();//update the legal moves and check for winner
+
+            }
+        });
+    }
+
+    private void drawBoard(int a, int b, int numPanel, boolean swap) throws InterruptedException, IOException, ClassNotFoundException {
+
+        if (!Start) {
+            scrollPane1.removeAll();//update the panel where the moves are appeard
+            if ((board.getCurrentPlayer().getAlliance().isBlue() == alliance.isBlue())) {
+                String s = new String("You: From " + (a + 1) + " To " + (b + 1) + "          ");
+                JLabel tem = new JLabel(s);
+                tem.setForeground(Color.RED);//add new move to the arraylist of the moves for the player
+                if ((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() < 1500) {//change the size depense the screen size
+                    tem.setFont(new Font("Serif", Font.BOLD, 13));
+                } else {
+                    tem.setFont(new Font("Serif", Font.BOLD, 18));
+                }
+                moves.add(0, tem);
+            } else {
+                String s = new String("Opponent: From " + (a + 1) + " To " + (b + 1) + "          ");
+                JLabel tem = new JLabel(s);
+                tem.setForeground(Color.BLUE);// add new move to the arraylist of the moves for the opponent
+                if ((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() < 1500) {//resize the font depenso on the screen size
+                    tem.setFont(new Font("Serif", Font.BOLD, 13));
+                } else {
+                    tem.setFont(new Font("Serif", Font.BOLD, 18));
+                }
+                moves.add(0, tem);//add the label to the arraylist
+            }
+            for (JLabel temp : moves) {//rewrite the move to the panel
+                scrollPane1.add(temp);
+            }
+            scrollPane1.validate();
+            scrollPane1.repaint();
+            scrollPane1.updateUI();
+            updateComponentTreeUI(this);
+
+        }
+        if (numPanel == 1) {// if the panel is the hand of the player
+            StartPane.remove(a);//remove the element in the a position
+            StartPane.add(new TilePanel(a, null, 1), a);// add an empty tilepanel there
+            tilesblue.set(a, new TilePanel(a, null, 1));//update the tilesblue
+            StartPane.validate();
+            StartPane.repaint();
+            StartPane.updateUI();
+        } else {//if it is on the board
+            if (!swap) {//if it is not a swap
+                tiles.set(a, new TilePanel(a, null, 0));//set to tiles and empty tilepanel in a position
+                board.setPawnOnBoard(a, null);//set null on the from cordinate
+                if(tiles.get(b).getPawn() == null){//if both pawn died we have null
+                    board.setPawnOnBoard(b, null);//set null in the destination cordinate
+                }
+            } else {
+                board.toStringBoard();
+            }
+        }
+        jPanel1.removeAll();//refresh the board panel
+        for (int i = 99; i >= 0; i--) {
+            if (!swap) {
+                if (tiles.get(i).getPos() == b || tiles.get(i).getPos() == a) {
+                    if (tiles.get(i).getPawn() != null) {
+                        tiles.get(i).add(new JLabel(tiles.get(i).getPawn().getImage()));
+                        if (tiles.get(i).getPos() == b) {
+                            tiles.get(i).getTile().getPawn().setCordinateOfPawn(b);
+                            board.setPawnOnBoard(b, tiles.get(i).getPawn());
+
+                        } else {
+                            tiles.get(i).getTile().getPawn().setCordinateOfPawn(a);
+                            board.setPawnOnBoard(a, tiles.get(i).getPawn());
+                        }
+                    }
+                } else {
+                    tiles.get(i).drawTile();
+                }
+                jPanel1.add(tiles.get(i));
+                jPanel1.validate();
+                jPanel1.updateUI();
+                updateComponentTreeUI(this);
+            } else {//if we have swap
+                if (tiles.get(i).getPos() == b || tiles.get(i).getPos() == a) {
+                    if (tiles.get(i).getPawn() != null) {
+                        tiles.get(i).add(new JLabel(tiles.get(i).getPawn().getImage()));
+                        if (tiles.get(i).getPos() == b) {
+                            tiles.get(i).getTile().getPawn().setCordinateOfPawn(b);
+                            board.setPawnOnBoard(b, tiles.get(i).getPawn());
+                                    // change the position on the board of the two pawns 
+                        } else {
+                            tiles.get(i).getTile().getPawn().setCordinateOfPawn(a);
+                            board.setPawnOnBoard(a, tiles.get(i).getPawn());
+                        }
+                    }
+                } else {
+                    tiles.get(i).drawTile();
+                }
+                jPanel1.add(tiles.get(i));
+            }
+
+        }
+        jPanel1.validate();
+        jPanel1.updateUI();
+        updateComponentTreeUI(this);
+
+        if (!Start) {
+            GamePlay();//update the legal moves
+            if (!board.getCurrentPlayer().getAlliance().isBlue()) {// here we are make visible the opponent move
+                tiles.get(a).setBackground(new Color(0, 255, 0, 50));
+                tiles.get(a).setBorder(BorderFactory.createLineBorder(Color.RED));
+                tiles.get(b).setBackground(new Color(0, 255, 0, 50));
+                tiles.get(b).setBorder(BorderFactory.createLineBorder(Color.RED));
+                CheckEnd();// check if we have reach the end of the game
+            }
+
+        }
+    }
+
+    /**
+     * Here we check if we have a winner and print the appropriate message.
+     */
+    private void CheckEnd() {
+        if (!Start) {
+            GamePlay();//update the legal moves and check if someone win.
+            if (!(board.getCurrentPlayer().getAlliance().isBlue())) {
+                if (EndGame) {
+                    timer.stop();
+                    if (Draw) {
+                        JOptionPane.showMessageDialog(getThisJFrame(), "Draw", "END GAME", JOptionPane.INFORMATION_MESSAGE);
+                        updateComponentTreeUI(getThisJFrame());
+
+                    } else {
+                        if (Winner) {
+                            JOptionPane.showMessageDialog(getThisJFrame(), "You Win", "END GAME", JOptionPane.INFORMATION_MESSAGE);
+                            updateComponentTreeUI(getThisJFrame());
+
+                        } else {
+                            JOptionPane.showMessageDialog(getThisJFrame(), "You Lose", "END GAME", JOptionPane.INFORMATION_MESSAGE);
+                            updateComponentTreeUI(getThisJFrame());
+
+                        }
+                    }
+
+                } else {
+                    min1 = 1;
+                    sec1 = 60;
+                    min.setText("0" + (min1 + 1));
+                    sec.setText("0" + (sec1 - 60));
+                    message.setText("Your Turn => ");
+                }
+            } else {
+                if (EndGame) {
+                    timer.stop();
+                    if (Draw) {
+                        JOptionPane.showMessageDialog(getThisJFrame(), "Draw", "END GAME", JOptionPane.INFORMATION_MESSAGE);
+                        updateComponentTreeUI(getThisJFrame());
+
+                    } else {
+                        if (Winner) {
+                            JOptionPane.showMessageDialog(getThisJFrame(), "You Win", "END GAME", JOptionPane.INFORMATION_MESSAGE);
+                            updateComponentTreeUI(getThisJFrame());
+
+                        } else {
+                            JOptionPane.showMessageDialog(getThisJFrame(), "You Lose", "END GAME", JOptionPane.INFORMATION_MESSAGE);
+                            updateComponentTreeUI(getThisJFrame());
+
+                        }
+                    }
+
+                } else {
+                    min1 = 1;
+                    sec1 = 60;
+                    min.setText("0" + (min1 + 1));
+                    sec.setText("0" + (sec1 - 60));
+                    message.setText("Opponent Turn => ");
+                }
+            }
+        }
+    }
+
+    /**
+     * we use this function to show to the player where he  can set his pawns in the start of the game.
+     */
+    private void highlightStartTiles() {
+        if (alliance.isBlue()) {
+            for (int i = 0; i < 40; i++) {
+                if (!board.getTile(i).isTileOccupied()) {
+                    tiles.get(i).setBackground(new Color(0, 0, 204, 50));
+                }
+            }
+        } else {
+            for (int i = 60; i < 100; i++) {
+                if (!board.getTile(i).isTileOccupied()) {
+                    tiles.get(i).setBackground(new Color(204, 0, 0, 50));
+                }
+            }
+        }
+        jPanel1.validate();
+        jPanel1.updateUI();
+        updateComponentTreeUI(this);
+
+    }
+
+    /**
+     * We use this function to update the panel with the hand of the player.
+     * 
+     * @param a is the from cordinate
+     * @param b is the destination cordinate
+     * @param pawn is the pawn he move
+     * @param p is the panel where the pawn comes from
+     */
+    private void drawStartPanel(int a, int b, final Pawn pawn, int p) {
+        if (p == 1) {// the panel for the hand 
+            tilesblue.set(a, new TilePanel(a, null, 1));
+            StartPane.remove(a);//update the start panel ( hand panel )
+            StartPane.add(tilesblue.get(a), a);
+
+            StartPane.validate();
+            StartPane.repaint();
+            StartPane.updateUI();
+        } else if (p == 0) {// if the source panel is the board
+            jPanel1.removeAll();//update the board panel
+            tiles.set(a, new TilePanel(a, null, 0));
+            for (final TilePanel boardTile : tiles) {
+                jPanel1.add(boardTile);
+            }
+            board.setPawnOnBoard(a, null);//update the board position
+            jPanel1.validate();
+            jPanel1.updateUI();
+            board.toStringBoard();
+        }
+        StartPane.removeAll();//update the hand panel
+        tilesblue.set(b, new TilePanel(b, pawn, 1));
+        tilesblue.get(b).add(new JLabel(pawn.getImage()));
+        for (final TilePanel boardTile : tilesblue) {
+            if (boardTile.getPos() == b) {
+                 this.bluePlayer.setCordinateofPawn(a, (b + 1) * (-1), p, !isClicked);
+                StartPane.add(boardTile);
             } else {
                 boardTile.drawTile();
             }
-            jPanel1.add(boardTile);
-            jPanel1.validate();             //Updating the board 
-            jPanel1.updateUI();
-            updateComponentTreeUI(this);
+            StartPane.add(boardTile);
         }
-        return null;
+        StartPane.validate();
+        StartPane.updateUI();
+        updateComponentTreeUI(this);
     }
 
-    public class TilePanel extends JPanel {    //method that corresponds the coordinates to the tiles of the panel 
+    
+    
+    public class TilePanel extends JPanel {
 
-        private Tile tile;   //variable for tile 
-
-        public TilePanel(int pos, Pawn p, int numberOfPanel) {// constractor of the class 
+        private Tile tile;
+        /**
+         * Every object of this class is a square on the board or in the hands of the players 
+         * 
+         * @param pos that position of the tile
+         * @param p the pawn which is set on this tile
+         * @param numberOfPanel the panel where this panel is on
+         */
+        public TilePanel(int pos, Pawn p, int numberOfPanel) {
             super();
             tile = new Tile(pos, p);
-            setBackground(new Color(0, 0, 0, 0));     //setting componets of the interface 
+            setBackground(new Color(0, 0, 0, 0));
             setLayout(new BorderLayout());
             this.setBorder(BorderFactory.createLineBorder(Color.GRAY));
             addMouseListener(new MouseListener() {
                 @Override
-                public void mouseClicked(final MouseEvent e) { //Action listener for button 
+                public void mouseClicked(final MouseEvent e) {
                     if (Start) {
-                        if (!isClicked || timeIsUp) {
+                        if (!isClicked || timeIsUp) {//is the game hasnt start yet or the time is up return
                             return;
                         }
                     } else {
                         if (!(board.getCurrentPlayer().getAlliance().isBlue() == alliance.isBlue()) || EndGame) {
-                            return;
+                            return;// if it is not your turn do nothing
                         }
                     }
-                    
-                    //declaration of values and positions and the values of the tiles and pawns ,according to the tile 
-                    
-                    if (numberOfPanel == 1) {         
-                        if (SwingUtilities.isRightMouseButton(e)) {
-                            if (sourceTile != null) {
+                    if (numberOfPanel == 1) {//if it is the hand panel
+                        if (SwingUtilities.isRightMouseButton(e)) {// to unchoose a pawn
+                            if (sourceTile != null) {//if a pawn exist
                                 getThis().unhighLighted(sourceTile.getTileCordinates(), NumPanel, MovedPawn);
-                                for (int i = 0; i < 100; i++) {
+                                for (int i = 0; i < 100; i++) {//unchoose it and refresh everything
                                     tiles.get(i).drawTile();
                                 }
                             }
                             sourceTile = null;
-                            destinationTile = null;  //declaring values 
+                            destinationTile = null;
                             MovedPawn = null;
                             NumPanel = -1;
 
                         } else if (SwingUtilities.isLeftMouseButton(e)) {
-                            if (sourceTile == null) {
+                            if (sourceTile == null) {//if we doesnt have choose a pawn
                                 if (Start) {
-                                    sourceTile = tilesred.get(getPos()).getTile();
+                                    sourceTile = tilesblue.get(getPos()).getTile();
                                     NumPanel = numberOfPanel;
                                     MovedPawn = sourceTile.getPawn();
                                     if (MovedPawn == null) {
@@ -1078,20 +1087,21 @@ public class Server extends JFrame implements Serializable {
                                         getThis().highLighted();
                                     }
                                 }
-                            } else {
-                                destinationTile = tilesred.get(getPos()).getTile();
-                                if (!tilesred.get(destinationTile.getTileCordinates()).getTile().isTileOccupied()) {
+                            } else {//if we have choose a pawn
+                                destinationTile = tilesblue.get(getPos()).getTile();
+                                if (!tilesblue.get(destinationTile.getTileCordinates()).getTile().isTileOccupied()) {//check if it can go to this cordinate
                                     if (Start) {
-                                        SwingUtilities.invokeLater(new Runnable() {
+                                       SwingUtilities.invokeLater(new Runnable() {
                                             @Override
                                             public void run() {
                                                 drawStartPanel(sourceTile.getTileCordinates(), destinationTile.getTileCordinates(), MovedPawn, NumPanel);
                                                 sourceTile = null;
-                                                destinationTile = null;    //declaring values
+                                                destinationTile = null;
                                                 MovedPawn = null;
                                                 NumPanel = -1;
                                             }
                                         });
+
                                         for (TilePanel tile : tiles) {
                                             tile.drawTile();
                                         }
@@ -1099,32 +1109,32 @@ public class Server extends JFrame implements Serializable {
                                 }
                             }
                         }
-                    } else if (numberOfPanel == 0) {
+                    } else if (numberOfPanel == 0) {//if we are in board panel
                         if (SwingUtilities.isRightMouseButton(e)) {
-                            if (sourceTile != null) {
+                            if (sourceTile != null) {//unchoose the pawn and unhighlight it
                                 getThis().unhighLighted(sourceTile.getTileCordinates(), NumPanel, MovedPawn);
                                 for (int i = 0; i < 100; i++) {
                                     tiles.get(i).drawTile();
                                 }
-
                             }
                             sourceTile = null;
-                            destinationTile = null;    //declaring values
+                            destinationTile = null;
                             MovedPawn = null;
                             NumPanel = -1;
                         } else if (SwingUtilities.isLeftMouseButton(e)) {
-                            if (sourceTile == null) {
+                            if (sourceTile == null) {//if no pawn is choosen
                                 if (Start) {
                                     sourceTile = tiles.get(getPos()).getTile();
                                     MovedPawn = sourceTile.getPawn();
-                                    NumPanel = 0;
-                                    if (MovedPawn == null) {
+                                    NumPanel = 0;//choose the pawn
+                                    if (MovedPawn == null) {// if the tile we choose is empty reset the variables
                                         sourceTile = null;
                                         NumPanel = -1;
                                     } else {
-                                        getThis().highLighted();
+                                        getThis().highLighted();//else highlite it
                                     }
-                                } else {
+
+                                } else {// if we have start the game 
                                     sourceTile = board.getTile(getPos());
                                     NumPanel = 0;
                                     MovedPawn = sourceTile.getPawn();
@@ -1135,11 +1145,10 @@ public class Server extends JFrame implements Serializable {
                                         getThis().highLighted();
                                         for (Move move : board.getCurrentPlayer().getLegalMoves()) {
                                             if (move.getCurrentCoordinate() == getThis().getPos()) {
-                                                tiles.get(move.getDestinationCoordinate()).setBackground(new Color(255, 255, 0, 50));
+                                                tiles.get(move.getDestinationCoordinate()).setBackground(new Color(255, 255, 0, 50));//highlight tha available move for this pawn
                                             }
                                         }
-                                        updateComponentTreeUI(getThisJFrame()); //updating the interface 
-
+                                        updateComponentTreeUI(getThisJFrame());
                                     }
                                 }
                             } else {
@@ -1147,14 +1156,13 @@ public class Server extends JFrame implements Serializable {
                                 if (Start) {
                                     if (!tiles.get(destinationTile.getTileCordinates()).getTile().isTileOccupied()) {
                                         if (board.getCurrentPlayer().getStart().contains(destinationTile.getTileCordinates())) {
-                                         tiles.remove(destinationTile.getTileCordinates());
+                                          tiles.remove(destinationTile.getTileCordinates());
                                             tiles.add(destinationTile.getTileCordinates(), new TilePanel(destinationTile.getTileCordinates(), sourceTile.getPawn(), 0));
                                             SwingUtilities.invokeLater(new Runnable() {
                                                 @Override
                                                 public void run() {
                                                     try {
                                                         drawBoard(sourceTile.getTileCordinates(), destinationTile.getTileCordinates(), NumPanel, false);
-
                                                     } catch (InterruptedException ex) {
                                                         Logger.getLogger(SinglePlayer.class.getName()).log(Level.SEVERE, null, ex);
                                                     } catch (IOException ex) {
@@ -1163,7 +1171,7 @@ public class Server extends JFrame implements Serializable {
                                                         Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
                                                     }
                                                     sourceTile = null;
-                                                    destinationTile = null;    //declaring values
+                                                    destinationTile = null;
                                                     MovedPawn = null;
                                                     NumPanel = -1;
                                                 }
@@ -1172,14 +1180,14 @@ public class Server extends JFrame implements Serializable {
                                                 tile.drawTile();
                                             }
                                         }
-                                    } else {
-                                        if (NumPanel == 0) {
+                                    } else {// here we have swap
+                                        if (NumPanel == 0) {//swap can be done only between two pawn in the board panel
                                             TilePanel temporary = tiles.get(destinationTile.getTileCordinates());
-                                            tiles.remove(destinationTile.getTileCordinates());
+                                            tiles.remove(destinationTile.getTileCordinates());// spaw their positions
                                             tiles.add(destinationTile.getTileCordinates(), new TilePanel(destinationTile.getTileCordinates(), sourceTile.getPawn(), 0));
                                             tiles.remove(sourceTile.getTileCordinates());
                                             tiles.add(sourceTile.getTileCordinates(), new TilePanel(sourceTile.getTileCordinates(), temporary.getPawn(), 0));
-                                            try {
+                                           try {//refresh the board panel
                                                 drawBoard(sourceTile.getTileCordinates(), destinationTile.getTileCordinates(), NumPanel, true);
                                             } catch (InterruptedException ex) {
                                                 Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
@@ -1192,28 +1200,28 @@ public class Server extends JFrame implements Serializable {
                                                 @Override
                                                 public void run() {
                                                     sourceTile = null;
-                                                    destinationTile = null;      //declaring values
+                                                    destinationTile = null;
                                                     MovedPawn = null;
                                                     NumPanel = -1;
                                                 }
                                             });
                                         }
                                     }
-                                } else {
-                                    final Move move = Move.MoveFactory.createMove(board, sourceTile.getTileCordinates(), destinationTile.getTileCordinates());
-                                    setCurrentMove(move);
-                                    final MoveTransition transition = board.getCurrentPlayer().makeMove(move);
-                                    if (transition.getMoveStatus().isDone()) {
-                                        TilePanel temp = tiles.get(move.getDestinationCoordinate());
-                                        if (temp.getPawn() == null) {
+                                } else {// when we make a move 
+                                     final Move move = Move.MoveFactory.createMove(board, sourceTile.getTileCordinates(), destinationTile.getTileCordinates());
+                                    setCurrentMove(move);//create a move with the specifications we gave from the clicks
+                                    board.toStringBoard();
+                                    final MoveTransition transition = board.getCurrentPlayer().makeMove(move);// get the status if the move
+                                    if (transition.getMoveStatus().isDone()) {//if the move is valid
+                                         TilePanel temp = tiles.get(move.getDestinationCoordinate());
+                                        if (temp.getPawn() == null) {// if the destination tile is empty make the move
                                             tiles.remove(move.getDestinationCoordinate());
                                             tiles.add(move.getDestinationCoordinate(), new TilePanel(move.getDestinationCoordinate(), move.getPawn(), 0));
-                                        } else {
-                                            Pawn winner = board.Conflict(move.getPawn(), temp.getPawn());
-                                            move.getPawn().setSide(true);
+                                        } else {// if it isnt empty
+                                            Pawn winner = board.Conflict(move.getPawn(), temp.getPawn());//calculate the winner
+                                            move.getPawn().setSide(true);//make both pawns flipped up
                                             temp.getPawn().setSide(true);
-
-                                            if (winner == null) {    //in case of unknown winner 
+                                           if (winner == null) {// if we have draw both pawns die
                                                 tiles.remove(move.getDestinationCoordinate());
                                                 tiles.add(move.getDestinationCoordinate(), new TilePanel(move.getDestinationCoordinate(), null, 0));
                                                 board.getCurrentPlayer().getOpponent().DeletePawn(temp.getPawn());
@@ -1223,7 +1231,7 @@ public class Server extends JFrame implements Serializable {
                                                 tilesoppent.set(i, new TilePanel(i, temp.getPawn(), 1));
                                                 tilesoppent.get(i).add(new JLabel(temp.getPawn().getImage()));
                                                 for (final TilePanel boardTile : tilesoppent) {
-                                                    if (boardTile.getPos() == i) {
+                                                    if (boardTile.getPos() == i) {//update the opponent panel
                                                         temp.getPawn().setCordinateOfPawn(-1);
                                                         OpponentPane.add(boardTile);
                                                     } else {
@@ -1233,13 +1241,13 @@ public class Server extends JFrame implements Serializable {
                                                     }
                                                 }
                                                 OpponentPane.validate();
-                                                OpponentPane.updateUI();                     //updating componets of the interface 
+                                                OpponentPane.updateUI();
                                                 updateComponentTreeUI(getThisJFrame());
-                                                StartPane.removeAll();
+                                                StartPane.removeAll();// update the hand of the player
                                                 int k = move.getPawn().getTablePos();
-                                                tilesred.set(k, new TilePanel(k, move.getPawn(), 1));
-                                                tilesred.get(k).add(new JLabel(move.getPawn().getImage()));
-                                                for (final TilePanel boardTile : tilesred) {
+                                                tilesblue.set(k, new TilePanel(k, move.getPawn(), 1));
+                                                tilesblue.get(k).add(new JLabel(move.getPawn().getImage()));
+                                                for (final TilePanel boardTile : tilesblue) {
                                                     if (boardTile.getPos() == k) {
                                                         move.getPawn().setCordinateOfPawn(-1);
                                                         StartPane.add(boardTile);
@@ -1250,14 +1258,14 @@ public class Server extends JFrame implements Serializable {
 
                                                 }
                                                 StartPane.validate();
-                                                StartPane.updateUI();                          //updating componets of the interface 
+                                                StartPane.updateUI();
                                                 updateComponentTreeUI(getThisJFrame());
 
-                                            } else if (winner == move.getPawn()) {
+                                            } else if (winner == move.getPawn()) {// if the player win
                                                 tiles.remove(move.getDestinationCoordinate());
                                                 tiles.add(move.getDestinationCoordinate(), new TilePanel(move.getDestinationCoordinate(), move.getPawn(), 0));
                                                 board.getCurrentPlayer().getOpponent().DeletePawn(temp.getPawn());
-                                                OpponentPane.removeAll();
+                                                OpponentPane.removeAll();// update the opponent panel
                                                 int i = temp.getPawn().getTablePos();
                                                 tilesoppent.set(i, new TilePanel(i, temp.getPawn(), 1));
                                                 tilesoppent.get(i).add(new JLabel(temp.getPawn().getImage()));
@@ -1272,17 +1280,17 @@ public class Server extends JFrame implements Serializable {
 
                                                 }
                                                 OpponentPane.validate();
-                                                OpponentPane.updateUI();                     //updating componets of the interface 
+                                                OpponentPane.updateUI();
                                                 updateComponentTreeUI(getThisJFrame());
-                                            } else {
+                                            } else {// if the opponent win
                                                 tiles.remove(move.getDestinationCoordinate());
                                                 tiles.add(move.getDestinationCoordinate(), new TilePanel(move.getDestinationCoordinate(), temp.getPawn(), 0));
                                                 board.getCurrentPlayer().DeletePawn(move.getPawn());
-                                                StartPane.removeAll();
+                                                StartPane.removeAll();// update the player hand panel
                                                 int k = move.getPawn().getTablePos();
-                                                tilesred.set(k, new TilePanel(k, move.getPawn(), 1));              //updating componets of the interface 
-                                                tilesred.get(k).add(new JLabel(move.getPawn().getImage()));
-                                                for (final TilePanel boardTile : tilesred) {
+                                                tilesblue.set(k, new TilePanel(k, move.getPawn(), 1));
+                                                tilesblue.get(k).add(new JLabel(move.getPawn().getImage()));
+                                                for (final TilePanel boardTile : tilesblue) {
                                                     if (boardTile.getPos() == k) {
                                                         move.getPawn().setCordinateOfPawn(-1);
                                                         StartPane.add(boardTile);
@@ -1293,19 +1301,17 @@ public class Server extends JFrame implements Serializable {
 
                                                 }
                                                 StartPane.validate();
-                                                StartPane.updateUI();                            //updating board 
+                                                StartPane.updateUI();
                                                 updateComponentTreeUI(getThisJFrame());
 
                                             }
                                             if (temp.getPawn().getValue() == -1) {
                                                 Winner = true;
-                                                EndGame = true;                            //end of the game 
-                                                //                         return;
+                                                EndGame = true;
                                             }
                                         }
                                         try {
                                             drawBoard(sourceTile.getTileCordinates(), destinationTile.getTileCordinates(), NumPanel, false);
-
                                         } catch (InterruptedException ex) {
                                             Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
                                         } catch (IOException ex) {
@@ -1317,41 +1323,28 @@ public class Server extends JFrame implements Serializable {
                                         SwingUtilities.invokeLater(new Runnable() {
                                             @Override
                                             public void run() {
-                                                /*                                                try {
-                                                    drawBoard(sourceTile.getTileCordinates(), destinationTile.getTileCordinates(), NumPanel, false);
-                                                } catch (InterruptedException ex) {
-                                                    Logger.getLogger(SinglePlayer.class.getName()).log(Level.SEVERE, null, ex);
-                                                } catch (IOException ex) {
-                                                    Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
-                                                } catch (ClassNotFoundException ex) {
-                                                    Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
-                                                }
-                                                 */ try {
+                                                try {
                                                     outdata.writeInt(1);
                                                     out.writeObject(move);
                                                     CheckEnd();
                                                     board.changeCurrentPlayer();
-                                                    //  OpponentMove();
                                                 } catch (IOException ex) {
                                                     Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
                                                 }
                                                 sourceTile = null;
-                                                destinationTile = null;                 //declaring values 
+                                                destinationTile = null;
                                                 MovedPawn = null;
                                                 NumPanel = -1;
-                                                //board.toStringBoard();
-
+                                                board.toStringBoard();
                                             }
                                         });
-
                                     }
                                 }
-
                             }
                         }
                     }
                 }
-                           //Action events 
+
                 @Override
                 public void mousePressed(MouseEvent me) {
                     return;
@@ -1376,80 +1369,81 @@ public class Server extends JFrame implements Serializable {
 
         }
 
-        public Tile getTile() {   // getter method for the tile 
+        public Tile getTile() {
             return this.tile;
         }
 
-        public int getPos() {        //getter method for the position 
+        public int getPos() {
             return this.tile.getTileCordinates();
         }
 
-        private TilePanel getThis() {     //getter method for the Tile panel 
+        private TilePanel getThis() {
             return this;
         }
 
-        public Pawn getPawn() {         //getter method for the pawn 
+        public Pawn getPawn() {
             return this.tile.getPawn();
         }
 
-        public void highLighted() {        //method for the pawns that are highlighted 
+        /**
+         * This function highlight a choosen pawn. 
+         */
+        public void highLighted() {
             this.setBorder(BorderFactory.createLineBorder(Color.CYAN));
             this.setBackground(Color.CYAN);
             validate();
-            repaint();            //updating board 
+            repaint();
             updateUI();
         }
 
-        public void unhighLighted(int a, int p, Pawn pawn) { // method for the pawns that are not higjlithed 
-           
-            //declaring components of interface 
-            if (p == 1) {
+        /**
+         * This function used to unhighligh every tile.
+         * 
+         * @param a is the cordinate 
+         * @param p is the panel
+         * @param pawn is the pawn we want to unhighlight
+         */
+        public void unhighLighted(int a, int p, Pawn pawn) {
+            if (p == 1) {//this is the hand panel
                 StartPane.remove(a);
-                tilesred.set(a, new TilePanel(a, pawn, 1));
-                tilesred.get(a).setLayout(new BorderLayout());
-                tilesred.get(a).setBorder(BorderFactory.createLineBorder(Color.GRAY));
-                tilesred.get(a).add(new JLabel(pawn.getImage()));
-                tilesred.get(a).setBackground(new Color(0, 0, 0, 0));
-                StartPane.add(tilesred.get(a), a);
+                tilesblue.set(a, new TilePanel(a, pawn, 1));
+                tilesblue.get(a).setLayout(new BorderLayout());
+                tilesblue.get(a).setBorder(BorderFactory.createLineBorder(Color.GRAY));
+                tilesblue.get(a).add(new JLabel(pawn.getImage()));
+                tilesblue.get(a).setBackground(new Color(0, 0, 0, 0));
+                StartPane.add(tilesblue.get(a), a);
                 StartPane.validate();
-                StartPane.repaint();               //updating board 
+                StartPane.repaint();
                 StartPane.updateUI();
-            } else if (p == 0) {
-                jPanel1.remove(a);
+            } else if (p == 0) {//this is the board panel
+                jPanel1.remove(99 - a);//99-a because we are the blue player so the cordinate a is in the other side
                 tiles.set(a, new TilePanel(a, pawn, 0));
                 tiles.get(a).setLayout(new BorderLayout());
                 tiles.get(a).setBorder(BorderFactory.createLineBorder(Color.GRAY));
                 tiles.get(a).add(new JLabel(pawn.getImage()));
                 tiles.get(a).setBackground(new Color(0, 0, 0, 0));
-                jPanel1.add(tiles.get(a), a);
+                jPanel1.add(tiles.get(a), 99 - a);
                 jPanel1.validate();
-                jPanel1.repaint();       //updating board 
+                jPanel1.repaint();
                 jPanel1.updateUI();
-                /* jPanel1.removeAll();
-                tiles.set(a, new TilePanel(a, pawn, Start, 0));
-                tiles.get(a).add(new JLabel(pawn.getFront()));
-                for (final TilePanel boardTile : tiles) {
-                    boardTile.drawTile();
-                    jPanel1.add(boardTile);
-                }
-                jPanel1.validate();
-                jPanel1.updateUI();*/
             }
             validate();
             repaint();
-            updateUI();                                 //updating board 
+            updateUI();
             updateComponentTreeUI(getThisJFrame());
         }
 
-        void drawTile() {   //method that is in charge of the tiles  view 
-            // In case that the tile is  valid 
+        /**
+         * This function give some standar speficication to the tiles.
+         */
+        void drawTile() {
             if (!(getPos() == 42 || getPos() == 43 || getPos() == 46 || getPos() == 47
                     || getPos() == 52 || getPos() == 53 || getPos() == 56 || getPos() == 57)) {
                 setLayout(new BorderLayout());
                 setBorder(BorderFactory.createLineBorder(Color.GRAY));
                 setBackground(new Color(0, 0, 0, 0));
                 validate();
-            } else { // In case that the tile is not  valid 
+            } else {
                 setLayout(new BorderLayout());
                 setBorder(BorderFactory.createLineBorder(Color.GRAY));
                 setBackground(new Color(0, 0, 0, 50));

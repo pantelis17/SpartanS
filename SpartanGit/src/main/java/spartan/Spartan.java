@@ -3,14 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package spartan;
+package main.java.spartan;
 
-import spartan.gui.MainMenu;
+import main.java.spartan.gui.MainMenu;
 
 /**
  *This is the main class where we start the game.
- * 
- * @author Pantelis Ypsilanti 2962 , Odysseas Zagoras 2902 , Theodoros Mosxos 2980
  */
 public class Spartan {
 

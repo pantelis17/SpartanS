@@ -3,15 +3,16 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package spartan.pieces;
+package main.java.spartan.pieces;
 
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.io.Serializable;
 import java.util.List;
 import javax.swing.ImageIcon;
-import spartan.Alliance;
-import spartan.board.*;
+
+import main.java.spartan.Alliance;
+import main.java.spartan.board.*;
 
 /**
  * This is the parent class which contains functions vital for the right work  of the pawns.
@@ -35,16 +36,16 @@ public abstract class Pawn implements Serializable {
         flipped = false;
         this.tablePosition = pos;
         if (this.pawnAlliance.isBlue()) {
-            ImageIcon img0 = new ImageIcon(Toolkit.getDefaultToolkit().getClass().getResource("/spartan/Images/blue.png"));
+            ImageIcon img0 = new ImageIcon(getClass().getResource("/main/resources/images/blue.png"));
             Image img1 = img0.getImage().getScaledInstance((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() / 24, (int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() / 24, Image.SCALE_SMOOTH); // set the size depense on the screen size 
-            ImageIcon img2 = new ImageIcon(Toolkit.getDefaultToolkit().getClass().getResource("/spartan/Images/" + value + "blue.png"));
+            ImageIcon img2 = new ImageIcon(getClass().getResource("/main/resources/images/" + value + "blue.png"));
             Image img3 = img2.getImage().getScaledInstance((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() / 24, (int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() / 24, Image.SCALE_SMOOTH);// set the size depense on the screen size 
             this.back = new ImageIcon(img1);
             this.front = new ImageIcon(img3);
         } else {
-            ImageIcon img0 = new ImageIcon(Toolkit.getDefaultToolkit().getClass().getResource("/spartan/Images/red.png"));
+            ImageIcon img0 = new ImageIcon(getClass().getResource("/main/resources/images/red.png"));
             Image img1 = img0.getImage().getScaledInstance((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() / 24, (int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() / 24, Image.SCALE_SMOOTH);// set the size depense on the screen size 
-            ImageIcon img2 = new ImageIcon(Toolkit.getDefaultToolkit().getClass().getResource("/spartan/Images/" + value + "red.png"));
+            ImageIcon img2 = new ImageIcon(getClass().getResource("/main/resources/images/" + value + "red.png"));
             Image img3 = img2.getImage().getScaledInstance((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() / 24, (int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() / 24, Image.SCALE_SMOOTH);// set the size depense on the screen size 
             this.back = new ImageIcon(img1);
             this.front = new ImageIcon(img3);

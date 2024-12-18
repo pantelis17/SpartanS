@@ -70,7 +70,7 @@
           <Color blue="0" green="0" red="cc" type="rgb"/>
         </Property>
         <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-          <Image iconType="3" name="/spartan/Images/map.png"/>
+          <Image iconType="3" name="/main/resources/images/map.png"/>
         </Property>
       </Properties>
       <Constraints>

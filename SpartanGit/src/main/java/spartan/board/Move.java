@@ -1,7 +1,8 @@
-package spartan.board;
+package main.java.spartan.board;
 
 import java.io.Serializable;
-import spartan.pieces.Pawn;
+
+import main.java.spartan.pieces.Pawn;
 
 /**
  * This class with it's subclasses contains the funtions we need to make a move.

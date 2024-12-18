@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package spartan.gui;
+package main.java.spartan.gui;
 
 import java.awt.Color;
 import java.awt.Cursor;
@@ -25,13 +25,13 @@ public class Load extends javax.swing.JFrame implements Runnable {
      */
     public Load() {
         initComponents();
-        Image logo = new ImageIcon(getClass().getResource("/spartan/Images/logo.png")).getImage();
+        Image logo = new ImageIcon(getClass().getResource("/main/resources/images/logo.png")).getImage();
         setAlwaysOnTop(true);
         setResizable(false);
         setLocation(-3,0);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setIconImage(logo);
-        Image t = new ImageIcon(getClass().getResource("/spartan/Images/cursor.png")).getImage();
+        Image t = new ImageIcon(getClass().getResource("/main/resources/images/cursor.png")).getImage();
         Toolkit toolkit = Toolkit.getDefaultToolkit();
         Cursor cursor = toolkit.createCustomCursor(t, new Point(5, 5), "Custom Cursor");
         setCursor(cursor);
@@ -77,10 +77,10 @@ public class Load extends javax.swing.JFrame implements Runnable {
 
     @Override
     public void run() {
-                Image logo = new ImageIcon(getClass().getResource("/spartan/Images/logo.png")).getImage();
+                Image logo = new ImageIcon(getClass().getResource("/main/resources/images/logo.png")).getImage();
         setAlwaysOnTop(true);
         setResizable(false);
-        Image t = new ImageIcon(getClass().getResource("/spartan/Images/cursor.png")).getImage();
+        Image t = new ImageIcon(getClass().getResource("/main/resources/images/cursor.png")).getImage();
         Toolkit toolkit = Toolkit.getDefaultToolkit();
         Cursor cursor = toolkit.createCustomCursor(t, new Point(5, 5), "Custom Cursor");
         setCursor(cursor);

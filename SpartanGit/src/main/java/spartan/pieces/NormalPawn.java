@@ -3,18 +3,19 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package spartan.pieces;
+package main.java.spartan.pieces;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import spartan.Alliance;
-import spartan.board.Board;
-import spartan.board.BoardUtilities;
-import spartan.board.Move.*;
-import spartan.board.Move;
-import spartan.board.Tile;
+
+import main.java.spartan.Alliance;
+import main.java.spartan.board.Board;
+import main.java.spartan.board.BoardUtilities;
+import main.java.spartan.board.Move;
+import main.java.spartan.board.Tile;
+import main.java.spartan.board.Move.*;
 
 /**
  * This Class is used to initialize every pawn which can be moved only 1 square per turn.

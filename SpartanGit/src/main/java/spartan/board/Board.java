@@ -1,14 +1,15 @@
-package spartan.board;
+package main.java.spartan.board;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import spartan.Alliance;
-import spartan.pieces.Pawn;
-import spartan.player.BluePlayer;
-import spartan.player.Player;
-import spartan.player.RedPlayer;
+
+import main.java.spartan.Alliance;
+import main.java.spartan.pieces.Pawn;
+import main.java.spartan.player.BluePlayer;
+import main.java.spartan.player.Player;
+import main.java.spartan.player.RedPlayer;
 
 /**
  *This class contains the functions for the changes in the board.

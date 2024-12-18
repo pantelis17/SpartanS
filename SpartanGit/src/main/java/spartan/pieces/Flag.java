@@ -1,12 +1,13 @@
 
-package spartan.pieces;
+package main.java.spartan.pieces;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import spartan.Alliance;
-import spartan.board.Board;
-import spartan.board.Move;
+
+import main.java.spartan.Alliance;
+import main.java.spartan.board.Board;
+import main.java.spartan.board.Move;
 
 
 /**

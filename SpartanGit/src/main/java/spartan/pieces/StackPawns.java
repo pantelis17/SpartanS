@@ -3,11 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package spartan.pieces;
+package main.java.spartan.pieces;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import spartan.Alliance;
+
+import main.java.spartan.Alliance;
 
 /**
  * This class is used to create the hands for the both players.

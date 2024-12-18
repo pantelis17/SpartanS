@@ -7,7 +7,7 @@
  * contributes for a better handling of Tiles . Each TilePanel inheritates the Tile class , adding a jPanle field for the use of GUI.
 
  */
-package spartan.gui;
+package main.java.spartan.gui;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -18,16 +18,18 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
+
+import main.java.spartan.Alliance;
+import main.java.spartan.board.Board;
+import main.java.spartan.board.Move;
+import main.java.spartan.board.Tile;
+import main.java.spartan.pieces.Pawn;
+import main.java.spartan.player.BluePlayer;
+import main.java.spartan.player.MoveTransition;
+import main.java.spartan.player.RedPlayer;
+
 import static javax.swing.JFrame.EXIT_ON_CLOSE;
 import static javax.swing.SwingUtilities.updateComponentTreeUI;
-import spartan.Alliance;
-import spartan.board.Board;
-import spartan.board.Move;
-import spartan.board.Tile;
-import spartan.pieces.Pawn;
-import spartan.player.BluePlayer;
-import spartan.player.MoveTransition;
-import spartan.player.RedPlayer;
 
 /**
  *
@@ -87,17 +89,17 @@ public class SinglePlayer extends JFrame {
         bluePlayer = board.getBluePlayer();
         redPlayer = board.getRedPlayer();
         //Initiliaze of the compontes.
-        Image logo = new ImageIcon(getClass().getResource("/spartan/Images/logo.png")).getImage();
+        Image logo = new ImageIcon(getClass().getResource("/main/resources/images/logo.png")).getImage();
         setAlwaysOnTop(true);
         setResizable(false);
-        Image t = new ImageIcon(getClass().getResource("/spartan/Images/cursor.png")).getImage();
+        Image t = new ImageIcon(getClass().getResource("/main/resources/images/cursor.png")).getImage();
         Toolkit toolkit = Toolkit.getDefaultToolkit();
         Cursor cursor = toolkit.createCustomCursor(t, new Point(5, 5), "Custom Cursor");
         setCursor(cursor);
         setSize((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() + 10, (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight() + 5);
         jLabel1.setSize((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth() + 30) / 2, (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight() - 10);
         jPanel1.setSize((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth() + 12) / 2, (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight() - 20);
-        ImageIcon background = new ImageIcon(Toolkit.getDefaultToolkit().getClass().getResource("/spartan/Images/map.png"));
+        ImageIcon background = new ImageIcon(getClass().getResource("/main/resources/images/map.png"));
         Image map = background.getImage().getScaledInstance((int) ((Toolkit.getDefaultToolkit().getScreenSize().getWidth() + 10) / 2),
                 (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight() + 10), Image.SCALE_SMOOTH);
         jLabel1.setIcon(new ImageIcon(map));
@@ -203,7 +205,7 @@ public class SinglePlayer extends JFrame {
         OptionPane.setSize((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 4, (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 3);
         OptionPane.setLocation((int) ((Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 2 + (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 4 + 1), (int) ((Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 3) * 2);
 
-        ImageIcon button = new ImageIcon(Toolkit.getDefaultToolkit().getClass().getResource("/spartan/Images/randombutton.png"));
+        ImageIcon button = new ImageIcon(getClass().getResource("/main/resources/images/randombutton.png"));
         Image button1 = button.getImage().getScaledInstance((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 4, (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 12, Image.SCALE_SMOOTH);
         //Buttons
         JButton random = new JButton("Random");
@@ -220,7 +222,7 @@ public class SinglePlayer extends JFrame {
         });
 
         JButton restart = new JButton("Restart");
-        ImageIcon button2 = new ImageIcon(Toolkit.getDefaultToolkit().getClass().getResource("/spartan/Images/restartbutton.png"));
+        ImageIcon button2 = new ImageIcon(getClass().getResource("/main/resources/images/restartbutton.png"));
         Image button3 = button2.getImage().getScaledInstance((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 4, (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 12, Image.SCALE_SMOOTH);
         restart.setIcon(new ImageIcon(button3));
         restart.setPreferredSize(new Dimension((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 5, (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 15));
@@ -244,7 +246,7 @@ public class SinglePlayer extends JFrame {
 
         JButton exit = new JButton("Exit");
 
-        ImageIcon button4 = new ImageIcon(Toolkit.getDefaultToolkit().getClass().getResource("/spartan/Images/exitbutton.png"));
+        ImageIcon button4 = new ImageIcon(getClass().getResource("/main/resources/images/exitbutton.png"));
         Image button5 = button4.getImage().getScaledInstance((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 4, (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 12, Image.SCALE_SMOOTH);
         exit.setIcon(new ImageIcon(button5));
         exit.setPreferredSize(new Dimension((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 5, (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 15));
@@ -261,7 +263,7 @@ public class SinglePlayer extends JFrame {
 
         JButton help = new JButton("Help");
 
-        ImageIcon button6 = new ImageIcon(Toolkit.getDefaultToolkit().getClass().getResource("/spartan/Images/helpbutton.png"));
+        ImageIcon button6 = new ImageIcon(getClass().getResource("/main/resources/images/helpbutton.png"));
         Image button7 = button6.getImage().getScaledInstance((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 4, (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 12, Image.SCALE_SMOOTH);
         help.setIcon(new ImageIcon(button7));
         help.setPreferredSize(new Dimension((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 5, (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 15));
@@ -948,7 +950,7 @@ public class SinglePlayer extends JFrame {
         jPanel1.setBounds(0, 0, 880, 650);
 
         jLabel1.setBackground(new java.awt.Color(204, 0, 0));
-        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/spartan/Images/map.png"))); // NOI18N
+        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/main/resources/images/map.png"))); // NOI18N
         getContentPane().add(jLabel1);
         jLabel1.setBounds(0, 0, 880, 650);
 
@@ -1284,7 +1286,7 @@ public class SinglePlayer extends JFrame {
 
         /*public JPanel replaceLabel(){
             JPanel a  = new JPanel();
-            a.add(new JLabel(new ImageIcon(getClass().getResource("/spartan/Images/red.gif"))));
+            a.add(new JLabel(new ImageIcon(getClass().getResource("/main/resources/images/red.gif"))));
             return a;
         }
          */

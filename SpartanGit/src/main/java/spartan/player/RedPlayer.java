@@ -1,19 +1,17 @@
-package spartan.player;
+package main.java.spartan.player;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Random;
-import spartan.Alliance;
-import spartan.board.Board;
-import spartan.pieces.Pawn;
-import spartan.pieces.StackPawns;
+
+import main.java.spartan.Alliance;
+import main.java.spartan.board.Board;
+import main.java.spartan.pieces.Pawn;
+import main.java.spartan.pieces.StackPawns;
 
 /**
  *  This class contain every function we need for the redPlayer.
- * 
- * @author Pantelis Ypsilanti 2962 , Odysseas Zagoras 2902 , Theodoros Mosxos 2980
  */
-public class RedPlayer extends Player implements Serializable {
+public class RedPlayer extends Player {
 
     ArrayList<Pawn> activeRedPawns;// is the pawn which is still in the game.
     ArrayList<Integer> startMove; // contains the move which the player can make in the set of his pawn

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package spartan.gui;
+package main.java.spartan.gui;
 
 import java.awt.Color;
 import java.awt.Cursor;
@@ -19,7 +19,6 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.logging.Level;
@@ -35,10 +34,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
-import networksocket.Client;
-import networksocket.Server;
 
-import spartan.Alliance;
+import main.java.spartan.Alliance;
+import main.java.spartan.networksocket.Client;
+import main.java.spartan.networksocket.Server;
 
 /**
  * This class is the JFrame of the start, Contains the modes of the game options
@@ -60,10 +59,10 @@ public class MainMenu extends javax.swing.JFrame {
         setTitle("Spartan");
         setLocation(-3, 0);
         alliance = Alliance.RED;//when the game start the player in the single mode have the red pawns
-        Image logo = new ImageIcon(getClass().getResource("/spartan/Images/logo.png")).getImage();
+        Image logo = new ImageIcon(getClass().getResource("/main/resources/images/logo.png")).getImage();
         setAlwaysOnTop(true);
         setResizable(false);
-        Image t = new ImageIcon(getClass().getResource("/spartan/Images/cursor.png")).getImage();
+        Image t = new ImageIcon(getClass().getResource("/main/resources/images/cursor.png")).getImage();
         Toolkit toolkit = Toolkit.getDefaultToolkit();
         Cursor cursor = toolkit.createCustomCursor(t, new Point(5, 5), "Custom Cursor");
         setCursor(cursor);
@@ -75,11 +74,11 @@ public class MainMenu extends javax.swing.JFrame {
         jPanel1.setBackground(new Color(0, 0, 0, 0));// so in will be transparenti
         setIconImage(logo);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        ImageIcon img = new ImageIcon(Toolkit.getDefaultToolkit().getClass().getResource("/spartan/Images/map.png"));
+        ImageIcon img = new ImageIcon(getClass().getResource("/main/resources/images/map.png"));
         Image img1 = img.getImage().getScaledInstance((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() + 10, (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight() + 5, Image.SCALE_SMOOTH);
         jLabel1.setIcon(new ImageIcon(img1));
         JButton Single = new JButton("Single");
-        ImageIcon button2 = new ImageIcon(Toolkit.getDefaultToolkit().getClass().getResource("/spartan/Images/singleplayerbutton.png"));
+        ImageIcon button2 = new ImageIcon(getClass().getResource("/main/resources/images/singleplayerbutton.png"));
         Image button3 = button2.getImage().getScaledInstance((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 4 + 45, 150, Image.SCALE_SMOOTH);
         Single.setIcon(new ImageIcon(button3));
         Single.addActionListener(new ActionListener() {
@@ -101,7 +100,7 @@ public class MainMenu extends javax.swing.JFrame {
         Single.setSize((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 4, (int) ((Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 27) * 3);
         Single.setLocation((int) ((Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 27) * 10, (int) ((Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 27) * 7);
         JButton Multi = new JButton("Multi");
-        ImageIcon button = new ImageIcon(Toolkit.getDefaultToolkit().getClass().getResource("/spartan/Images/multiplayerbutton.png"));
+        ImageIcon button = new ImageIcon(getClass().getResource("/main/resources/images/multiplayerbutton.png"));
         Image button1 = button.getImage().getScaledInstance((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 4 + 45, 150, Image.SCALE_SMOOTH);
         Multi.setIcon(new ImageIcon(button1));
         Multi.addActionListener(new ActionListener() {
@@ -214,7 +213,7 @@ public class MainMenu extends javax.swing.JFrame {
         Multi.setSize((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 4, (int) ((Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 27) * 3);
         Multi.setLocation((int) ((Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 27) * 10, (int) ((Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 27) * 11);
         JButton Exit = new JButton("Exit");
-        ImageIcon button4 = new ImageIcon(Toolkit.getDefaultToolkit().getClass().getResource("/spartan/Images/exitbutton.png"));
+        ImageIcon button4 = new ImageIcon(getClass().getResource("/main/resources/images/exitbutton.png"));
         Image button5 = button4.getImage().getScaledInstance((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 4 + 45, 150, Image.SCALE_SMOOTH);
         Exit.setIcon(new ImageIcon(button5));
         Exit.addActionListener(new ActionListener() {
@@ -227,7 +226,7 @@ public class MainMenu extends javax.swing.JFrame {
         Exit.setLocation((int) ((Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 27) * 10, (int) ((Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 27) * 19);
 
         JButton Options = new JButton("Options");
-        ImageIcon button8 = new ImageIcon(Toolkit.getDefaultToolkit().getClass().getResource("/spartan/Images/optionbutton.png"));
+        ImageIcon button8 = new ImageIcon(getClass().getResource("/main/resources/images/optionbutton.png"));
         Image button9 = button8.getImage().getScaledInstance((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 4 + 50, 150, Image.SCALE_SMOOTH);
         Options.setIcon(new ImageIcon(button9));
         Options.addActionListener(new ActionListener() {
@@ -254,7 +253,7 @@ public class MainMenu extends javax.swing.JFrame {
         Options.setLocation((int) ((Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 27) * 10, (int) ((Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 27) * 15);
 
         JButton Help = new JButton("Help");
-        ImageIcon button6 = new ImageIcon(Toolkit.getDefaultToolkit().getClass().getResource("/spartan/Images/helpbutton.png"));
+        ImageIcon button6 = new ImageIcon(getClass().getResource("/main/resources/images/helpbutton.png"));
         Image button7 = button6.getImage().getScaledInstance((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 9, (int) ((Toolkit.getDefaultToolkit().getScreenSize().getHeight()) / 20) * 2, Image.SCALE_SMOOTH);
         Help.setIcon(new ImageIcon(button7));
         Help.addActionListener(new ActionListener() {
@@ -293,7 +292,7 @@ public class MainMenu extends javax.swing.JFrame {
     public static void music() {
         try {
 
-            InputStream input = MainMenu.class.getResource("/spartan/music/4o_cut.wav").openStream();// load the music file
+            InputStream input = MainMenu.class.getResource("/main/resources/music/4o_cut.wav").openStream();// load the music file
             AudioInputStream audioIn = AudioSystem.getAudioInputStream(input);
             Clip clip = AudioSystem.getClip();
             clip.open(audioIn);//start the audio

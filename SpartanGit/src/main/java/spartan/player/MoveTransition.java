@@ -2,10 +2,10 @@
  * This class is about of the move . It contains some usefull componets of Board in order to adjust the move in Board.
  * 
  */
-package spartan.player;
+package main.java.spartan.player;
 
-import spartan.board.Board;
-import spartan.board.Move;
+import main.java.spartan.board.Board;
+import main.java.spartan.board.Move;
 
 /**
  *

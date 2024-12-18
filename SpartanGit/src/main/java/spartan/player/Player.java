@@ -6,18 +6,19 @@
  * The bot acts as a opponent .
  *
  */
-package spartan.player;
+package main.java.spartan.player;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import spartan.Alliance;
-import spartan.board.Board;
-import spartan.board.Move;
-import spartan.board.Tile;
-import spartan.pieces.Pawn;
-import spartan.player.MoveTransition.MoveStatus;
+
+import main.java.spartan.Alliance;
+import main.java.spartan.board.Board;
+import main.java.spartan.board.Move;
+import main.java.spartan.board.Tile;
+import main.java.spartan.pieces.Pawn;
+import main.java.spartan.player.MoveTransition.MoveStatus;
 
 /**
  *
