@@ -73,108 +73,131 @@ public abstract class Player implements Serializable {
         final var random = new ArrayList<Pawn>();
         final var coordinate = new ArrayList<Integer>(); // Arraylist of the coordinates 
         final var isBlueAlliance = getAlliance().isBlue();
-        int[] proposalsForBomb = { -1, 1, -10, 10, 9, 11, -9, -11 }; //Array with candidate places for the bomb
-        int cor;
+        int[] proposalsForBomb = { -1, 1, -10, 10, 9, 11, -9, -11 }; // Candidate places for the bomb
         int flag = -1;
-        int bombs = 3; //Initializing the number of the pawns
+        int bombs = 3;
         int spies = 4;
+    
+        // Fill the coordinates array
         for (var i = startDeck; i < endDeck; i++) {
-            coordinate.add(i); //Adding the pawns in the coordinate ArrayList
+            coordinate.add(i);
         }
-        for (final var pawn : activePawns) { // // Iteration to calculate the places of the pawns
-            if (pawn.getValue() == -1) { //  calculate the place of the  flag
-                cor = (isBlueAlliance ? 0 : 80) + randomGenerator.nextInt(isBlueAlliance ? 19 : 20);
-                coordinate.remove(Integer.valueOf(cor));
-                flag = cor;
-                pawn.setCoordinateOfPawn(cor);
-            } else if (pawn.getValue() == 0) { // calculate the place of the bomb
-                if (bombs > 0) {
-                    do {
-                        cor = proposalsForBomb[randomGenerator.nextInt(proposalsForBomb.length)] + flag;
-                        if (coordinate.contains(cor)) { // Placing the bombs in the candidate positions 
-                            pawn.setCoordinateOfPawn(cor);
-                        }
-                    } while (!coordinate.contains(cor));
-                    coordinate.remove(Integer.valueOf(cor)); //Placing all the bombs until all are placed
-                    bombs--;
-                } else {
-                    do {
-                        cor = (isBlueAlliance ? 0 : 60) + randomGenerator.nextInt(40);
-                        if (coordinate.contains(cor)) {
-                            pawn.setCoordinateOfPawn(cor);
-                        }
-                    } while (!coordinate.contains(cor));
-                    coordinate.remove(Integer.valueOf(cor));
-
-                }
-
-            } else if (pawn.getValue() == 2) { // calculate the place of the spies 
-                if (spies > 0) {
-                    do {
-                        cor = (isBlueAlliance ? 0 : 60) + randomGenerator.nextInt(40);
-                        if (coordinate.contains(cor) && (isBlueAlliance ? cor >= 20 : cor < 80)) {
-                            pawn.setCoordinateOfPawn(cor);
-                        }
-                    } while (!coordinate.contains(cor) || (isBlueAlliance ? cor < 20 : cor >= 80)); //Placing all the spies until all are placed
-                    coordinate.remove(Integer.valueOf(cor));
-                    spies--;
-                } else {
-                    do {
-                        cor = (isBlueAlliance ? 0 : 60) + randomGenerator.nextInt(40);
-                        if (coordinate.contains(cor)) {
-                            pawn.setCoordinateOfPawn(cor);
-                        }
-                    } while (!coordinate.contains(cor));
-                    coordinate.remove(Integer.valueOf(cor));
-
-                }
-            } else {
-                do {
-                    cor = (isBlueAlliance ? 0 : 60) + randomGenerator.nextInt(40);
-                    if (coordinate.contains(cor)) {
-                        pawn.setCoordinateOfPawn(cor);
-                    }
-                } while (!coordinate.contains(cor));
-                coordinate.remove(Integer.valueOf(cor));
+    
+        for (final var pawn : activePawns) {
+            if (pawn.getValue() == -1) { 
+                flag = placeFlag(isBlueAlliance, coordinate);
+                pawn.setCoordinateOfPawn(flag);
+            } else if (pawn.getValue() == 0) { 
+                placeBomb(pawn, coordinate, proposalsForBomb, flag, bombs, isBlueAlliance);
+                bombs--;
+            } else if (pawn.getValue() == 2) { 
+                placeSpy(pawn, coordinate, spies, isBlueAlliance);
+                spies--;
+            } else { 
+                placeOtherPawn(pawn, coordinate, isBlueAlliance);
             }
-            random.add(pawn); // Adding the pawns by random order
+            random.add(pawn); // Add the pawn by random order
         }
+    
+        // Set pawns on the board
         for (final var pawn : random) {
-            this.board.setPawnOnBoard(pawn.getPositionOfPawn(), pawn); //Iteration of placing the pawns on the board
+            this.board.setPawnOnBoard(pawn.getPositionOfPawn(), pawn);
         }
-        this.board.toStringBoard(); //Getting the coordinates 
+    
+        this.board.toStringBoard(); // Get the coordinates 
         this.setActivePawns(random);
-        return random; //returns the random values
+        return random; // Return the random values
     }
+    
+    // Helper method to place the flag
+    private int placeFlag(boolean isBlueAlliance, List<Integer> coordinate) {
+        int cor = (isBlueAlliance ? 0 : 80) + randomGenerator.nextInt(isBlueAlliance ? 19 : 20);
+        coordinate.remove(Integer.valueOf(cor)); // Remove selected coordinate
+        return cor;
+    }
+    
+    // Helper method to place bombs
+    private void placeBomb(Pawn pawn, List<Integer> coordinate, int[] proposalsForBomb, int flag, int bombs, boolean isBlueAlliance) {
+        int cor;
+        if (bombs > 0) {
+            do {
+                cor = proposalsForBomb[randomGenerator.nextInt(proposalsForBomb.length)] + flag;
+            } while (!coordinate.contains(cor)); // Find valid position
+            pawn.setCoordinateOfPawn(cor);
+        } else {
+            do {
+                cor = (isBlueAlliance ? 0 : 60) + randomGenerator.nextInt(40);
+            } while (!coordinate.contains(cor)); // Find valid position
+            pawn.setCoordinateOfPawn(cor);
+        }
+        coordinate.remove(Integer.valueOf(cor)); // Remove selected coordinate
+    }
+    
+    // Helper method to place spies
+    private void placeSpy(Pawn pawn, List<Integer> coordinate, int spies, boolean isBlueAlliance) {
+        int cor;
+        if (spies > 0) {
+            do {
+                cor = (isBlueAlliance ? 0 : 60) + randomGenerator.nextInt(40);
+            } while (!coordinate.contains(cor) || (isBlueAlliance ? cor < 20 : cor >= 80)); // Ensure valid spy position
+            pawn.setCoordinateOfPawn(cor);
+        } else {
+            do {
+                cor = (isBlueAlliance ? 0 : 60) + randomGenerator.nextInt(40);
+            } while (!coordinate.contains(cor)); // Find valid position
+            pawn.setCoordinateOfPawn(cor);
+        }
+        coordinate.remove(Integer.valueOf(cor)); // Remove selected coordinate
+    }
+    
+    // Helper method to place other pawns
+    private void placeOtherPawn(Pawn pawn, List<Integer> coordinate, boolean isBlueAlliance) {
+        int cor;
+        do {
+            cor = (isBlueAlliance ? 0 : 60) + randomGenerator.nextInt(40);
+        } while (!coordinate.contains(cor)); // Find valid position
+        pawn.setCoordinateOfPawn(cor);
+        coordinate.remove(Integer.valueOf(cor)); // Remove selected coordinate
+    }    
 
     //Method that sets the position and the coordinates of the pawns on the panel of the game
     public void setCoordinateOfPawn(int pos, int coordinate, int panel, boolean start) {
+        int position;
         if (panel == 0) {
-            var position = 0;
-            for (final var pawn : activePawns) {
-                if (pawn.getPositionOfPawn() == pos) { //Calculating the coordinates
-                    break;
-                } else {
-                    position++;
-                }
-            }
-            this.activePawns.get(position).setCoordinateOfPawn(coordinate); //Getting the position and the coordinates
+            // In case of panel 0, find the pawn and update its coordinate
+            position = findPawnByPosition(pos);
         } else {
+            // In case of other panels, handle based on 'start' flag
             if (start) {
-                this.activePawns.get(pos).setCoordinateOfPawn(coordinate);
+                activePawns.get(pos).setCoordinateOfPawn(coordinate);
+                return;
             } else {
-                var position = 0;
-                for (final var pawn : this.activePawns) {
-                    if ((pawn.getPositionOfPawn() + 1) * (-1) == pos) { // numerical operation to calculate the position
-                        break;
-                    } else {
-                        position++;
-                    }
-                }
-                this.activePawns.get(position).setCoordinateOfPawn(coordinate); //Getting the position and the coordinates
-
+                position = findPawnByCalculatedPosition(pos);
             }
         }
+        if (position >= 0) {
+            activePawns.get(position).setCoordinateOfPawn(coordinate);
+        }
+    }
+    
+    // Helper method to find a pawn by its position
+    private int findPawnByPosition(int pos) {
+        for (int i = 0; i < activePawns.size(); i++) {
+            if (activePawns.get(i).getPositionOfPawn() == pos) {
+                return i;  // Return the index of the pawn
+            }
+        }
+        return -1;  // Return -1 if not found
+    }
+    
+    // Helper method to find a pawn by a calculated position
+    private int findPawnByCalculatedPosition(int pos) {
+        for (int i = 0; i < activePawns.size(); i++) {
+            if ((activePawns.get(i).getPositionOfPawn() + 1) * (-1) == pos) {
+                return i;  // Return the index of the pawn
+            }
+        }
+        return -1;  // Return -1 if not found
     }
 
     private boolean isLegalMove(final Move move) {
@@ -207,41 +230,68 @@ public abstract class Player implements Serializable {
      * @return a move
      */
     public Move botMove(List<Tile> tiles) {
-        //check if 1 is near the 10 of opponent.
+        // Check if pawn (value 1) is near an opponent's pawn (value 10) and perform move
+        Move move = checkOpponentProximity(tiles);
+        if (move != null) {
+            return move;
+        }
+    
+        // If no opponent proximity found, attempt to make a random attack
+        return makeRandomAttackMove(tiles);
+    }
+    
+    // Helper method to check if a pawn (value 1) is near an opponent's pawn (value 10)
+    private Move checkOpponentProximity(List<Tile> tiles) {
         for (final var m : legalMoves) {
-            if (tiles.get(m.getDestinationCoordinate()).isTileOccupied()
-                    && m.getPawn().getValue() == 1
-                    && tiles.get(m.getDestinationCoordinate()).getPawn().getValue() == 10) {
-                if (tiles.get(m.getDestinationCoordinate()).getPawn().getSide()) {
-                    return m;
-                } else {
-                    break;
+            if (tiles.get(m.getDestinationCoordinate()).isTileOccupied()) {
+                Pawn destinationPawn = tiles.get(m.getDestinationCoordinate()).getPawn();
+                if (m.getPawn().getValue() == 1 && destinationPawn.getValue() == 10) {
+                    if (destinationPawn.getSide()) {
+                        return m; // Return move if opponent's pawn (value 10) is on the same side
+                    } else {
+                        break; // Stop checking if pawn is on the opposite side
+                    }
                 }
             }
         }
-        //a simple way to make an attack .
-        //chance can break the loop and return the value of a (the random move) . The move should be legal.
-        int a, chance = 0;
+        return null; // No valid move found in this case
+    }
+    
+    // Helper method to make a random attack move based on certain chances
+    private Move makeRandomAttackMove(List<Tile> tiles) {
+        int a, chance;
         while (true) {
             a = randomGenerator.nextInt(this.legalMoves.size());
-            if (tiles.get(legalMoves.get(a).getDestinationCoordinate()).isTileOccupied()) {
-                if (tiles.get(legalMoves.get(a).getDestinationCoordinate()).getPawn().getValue() > legalMoves.get(a)
-                        .getPawn().getValue()) {
+            Tile destinationTile = tiles.get(legalMoves.get(a).getDestinationCoordinate());
+            
+            // Check if destination tile is occupied
+            if (destinationTile.isTileOccupied()) {
+                Pawn destinationPawn = destinationTile.getPawn();
+                Pawn movingPawn = legalMoves.get(a).getPawn();
+                
+                // Attack condition: moving pawn value is less than the opponent's pawn
+                if (destinationPawn.getValue() > movingPawn.getValue()) {
                     chance = randomGenerator.nextInt(10);
-
-                    if (chance == 2 || chance == 4 || chance == 8) {
-                        break;// flag = false;
+    
+                    // Chance-based logic to decide if the move should be performed
+                    if (shouldBreakChance(chance)) {
+                        break;
                     }
                 } else {
-                    break;
+                    break; // No attack if the pawn is stronger or equal
                 }
             } else {
-                break;
+                break; // If the tile is not occupied, move can be performed
             }
         }
-        return legalMoves.get(a);
+        return legalMoves.get(a); // Return the selected move
     }
-
+    
+    // Helper method to determine if the move should be made based on the random chance
+    private boolean shouldBreakChance(int chance) {
+        return chance == 2 || chance == 4 || chance == 8;
+    }
+    
     /**
      * Caclulate all legal Moves of the player ,updating the legalPawns and the
      * legalMoves of the Player. We use a list so each time we calculate
