@@ -28,6 +28,7 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.BorderFactory;
@@ -42,10 +43,10 @@ import javax.swing.SwingUtilities;
 import static javax.swing.SwingUtilities.updateComponentTreeUI;
 import javax.swing.Timer;
 
-import com.spartan.Alliance;
 import com.spartan.board.Board;
 import com.spartan.board.Move;
 import com.spartan.board.Tile;
+import com.spartan.enumerations.Alliance;
 import com.spartan.gui.Load;
 import com.spartan.gui.MainMenu;
 import com.spartan.gui.SinglePlayer;
@@ -124,15 +125,16 @@ public class Client extends JFrame implements Serializable {
         setAlwaysOnTop(true);
         setResizable(false);
         Image t = new ImageIcon(getClass().getResource("/images/cursor.png")).getImage();
+        final var resizedCursorImage = t.getScaledInstance(100, 100, Image.SCALE_SMOOTH); // Set desired size here
         Toolkit toolkit = Toolkit.getDefaultToolkit();
-        Cursor cursor = toolkit.createCustomCursor(t, new Point(5, 5), "Custom Cursor");
+        Cursor cursor = toolkit.createCustomCursor(resizedCursorImage, new Point(5, 5), "Custom Cursor");
         setCursor(cursor);
-        setSize((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() + 10, (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight() + 5);
+        setSize((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth(), (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight() );
         jLabel1.setSize((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth() + 30) / 2, (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight() - 10);
         jPanel1.setSize((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth() + 12) / 2, (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight() - 20);
 
         ImageIcon background = new ImageIcon(getClass().getResource("/images/map.png"));
-        Image map = background.getImage().getScaledInstance((int) ((Toolkit.getDefaultToolkit().getScreenSize().getWidth() + 10) / 2),
+        Image map = background.getImage().getScaledInstance((int) ((Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 2),
                 (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight() + 10), Image.SCALE_SMOOTH);
         jLabel1.setIcon(new ImageIcon(map));
         setIconImage(logo);
@@ -181,7 +183,7 @@ public class Client extends JFrame implements Serializable {
             for (int j = 0; j < 10; j++) {
                 if (!alliance.isBlue()) {// this part will be used later if we decide to make the client to can be red player too
                     tilesblue.add(new TilePanel(i * 10 + j, this.redPlayer.getPawnOfStack(i * 10 + j), 1));
-                    this.redPlayer.setCordinateofPawn(i * 10 + j, (i * 10 + j + 1) * (-1), 1, !isClicked);
+                    this.redPlayer.setCoordinateOfPawn(i * 10 + j, (i * 10 + j + 1) * (-1), 1, !isClicked);
                     tilesblue.get(i * 10 + j).setLayout(new BorderLayout());
                     tilesblue.get(i * 10 + j).setBorder(BorderFactory.createLineBorder(Color.GRAY));
                     this.redPlayer.getPawnOfStack(i * 10 + j).setSide(true);
@@ -189,7 +191,7 @@ public class Client extends JFrame implements Serializable {
                     tilesblue.get(i * 10 + j).setBackground(new Color(0, 0, 0, 0));
                 } else {// for now 
                     tilesblue.add(new TilePanel(i * 10 + j, this.bluePlayer.getPawnOfStack(i * 10 + j), 1));//add new Tile panels with the pawns of the blue's hand
-                    this.bluePlayer.setCordinateofPawn(i * 10 + j, (i * 10 + j + 1) * (-1), 1, !isClicked);
+                    this.bluePlayer.setCoordinateOfPawn(i * 10 + j, (i * 10 + j + 1) * (-1), 1, !isClicked);
                     tilesblue.get(i * 10 + j).setLayout(new BorderLayout());
                     tilesblue.get(i * 10 + j).setBorder(BorderFactory.createLineBorder(Color.GRAY));
                     this.bluePlayer.getPawnOfStack(i * 10 + j).setSide(true);
@@ -285,7 +287,7 @@ public class Client extends JFrame implements Serializable {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if ((board.getCurrentPlayer().getAlliance().isBlue() == alliance.isBlue()) && !Start) {//can activate this button only when we are in the main game and its the blue player turn
-                    Move move = board.getCurrentPlayer().BotMove(board.getGameBoard());//choose a random move 
+                    Move move = board.getCurrentPlayer().botMove(board.getGameBoard());//choose a random move 
                     tiles.get(move.getCurrentCoordinate()).setBackground(new Color(255, 0, 0, 50));//change the color so the player can see it
                     tiles.get(move.getDestinationCoordinate()).setBackground(new Color(255, 0, 0, 50));
                     jPanel1.removeAll();//refresh the jPanel
@@ -585,15 +587,15 @@ public class Client extends JFrame implements Serializable {
     private void GamePlay() {
         this.board.getCurrentPlayer().calculateLegalMoves(board);
         this.board.getCurrentPlayer().getOpponent().calculateLegalMoves(board);
-        if (redPlayer.getAvailablePawns().isEmpty() && bluePlayer.getAvailablePawns().isEmpty()) {// if both players dont have any move to make
+        if (redPlayer.getLegalPawns().isEmpty() && bluePlayer.getLegalPawns().isEmpty()) {// if both players dont have any move to make
             Draw = true;
             EndGame = true;
-        } else if (redPlayer.getAvailablePawns().isEmpty()) {//if red player, the opponent has no move to make
+        } else if (redPlayer.getLegalPawns().isEmpty()) {//if red player, the opponent has no move to make
             EndGame = true;
 
             Winner = true;
 
-        } else if (bluePlayer.getAvailablePawns().isEmpty()) {//if blue player, you, have no moves to make
+        } else if (bluePlayer.getLegalPawns().isEmpty()) {//if blue player, you, have no moves to make
 
             EndGame = true;
 
@@ -610,10 +612,10 @@ public class Client extends JFrame implements Serializable {
      * @throws ClassNotFoundException 
      */
     private void Random(Alliance a) throws IOException, ClassNotFoundException {
-        ArrayList<Pawn> rand = new ArrayList<>();
+        List<Pawn> rand;
         int min, max;
         if (a.isBlue()) {
-            rand = bluePlayer.Random();
+            rand = bluePlayer.random();
             min = 0;//the minimun position on the board
             max = 40;//the maximun position on the board
             StartPane.removeAll();
@@ -680,8 +682,8 @@ public class Client extends JFrame implements Serializable {
             if (winner == null) {// if the is no winner then both go out
                 tiles.remove(move.getDestinationCoordinate());
                 tiles.add(move.getDestinationCoordinate(), new TilePanel(move.getDestinationCoordinate(), null, 0));
-                board.getCurrentPlayer().getOpponent().DeletePawn(temp.getPawn());
-                board.getCurrentPlayer().DeletePawn(move.getPawn());
+                board.getCurrentPlayer().getOpponent().deletePawn(temp.getPawn());
+                board.getCurrentPlayer().deletePawn(move.getPawn());
                 OpponentPane.removeAll();//update the opponentPnae
                 int k = move.getPawn().getTablePos();//get the position the pawn have in the player's hand
                 tilesoppent.set(k, new TilePanel(k, move.getPawn(), 1));
@@ -706,7 +708,7 @@ public class Client extends JFrame implements Serializable {
                 tilesblue.get(i).add(new JLabel(temp.getPawn().getImage()));
                 for (final TilePanel boardTile : tilesblue) {
                     if (boardTile.getPos() == i) {
-                        temp.getPawn().setCordinateOfPawn(-1);
+                        temp.getPawn().setCoordinateOfPawn(-1);
                         StartPane.add(boardTile);
                     } else {
                         boardTile.drawTile();
@@ -720,14 +722,14 @@ public class Client extends JFrame implements Serializable {
             } else if (winner == move.getPawn()) {//player lose this conflict
                 tiles.remove(move.getDestinationCoordinate());//remove the pawn from the destination
                 tiles.add(move.getDestinationCoordinate(), new TilePanel(move.getDestinationCoordinate(), move.getPawn(), 0));// add the winner of the confilct there
-                board.getCurrentPlayer().getOpponent().DeletePawn(temp.getPawn());
+                board.getCurrentPlayer().getOpponent().deletePawn(temp.getPawn());
                 StartPane.removeAll();
                 int i = temp.getPawn().getTablePos();//get the position in the hand of the player
                 tilesblue.set(i, new TilePanel(i, temp.getPawn(), 1));
                 tilesblue.get(i).add(new JLabel(temp.getPawn().getImage()));
                 for (final TilePanel boardTile : tilesblue) {
                     if (boardTile.getPos() == i) {
-                        temp.getPawn().setCordinateOfPawn(-1);
+                        temp.getPawn().setCoordinateOfPawn(-1);
                         StartPane.add(boardTile);
                     } else {
                         boardTile.drawTile();
@@ -741,7 +743,7 @@ public class Client extends JFrame implements Serializable {
             } else {//player win this conflict
                 tiles.remove(move.getDestinationCoordinate());
                 tiles.add(move.getDestinationCoordinate(), new TilePanel(move.getDestinationCoordinate(), temp.getPawn(), 0));
-                board.getCurrentPlayer().DeletePawn(move.getPawn());
+                board.getCurrentPlayer().deletePawn(move.getPawn());
                 OpponentPane.removeAll();//refresh the opponent graceyard
                 int k = move.getPawn().getTablePos();
                 tilesoppent.set(k, new TilePanel(k, move.getPawn(), 1));
@@ -846,11 +848,11 @@ public class Client extends JFrame implements Serializable {
                     if (tiles.get(i).getPawn() != null) {
                         tiles.get(i).add(new JLabel(tiles.get(i).getPawn().getImage()));
                         if (tiles.get(i).getPos() == b) {
-                            tiles.get(i).getTile().getPawn().setCordinateOfPawn(b);
+                            tiles.get(i).getTile().getPawn().setCoordinateOfPawn(b);
                             board.setPawnOnBoard(b, tiles.get(i).getPawn());
 
                         } else {
-                            tiles.get(i).getTile().getPawn().setCordinateOfPawn(a);
+                            tiles.get(i).getTile().getPawn().setCoordinateOfPawn(a);
                             board.setPawnOnBoard(a, tiles.get(i).getPawn());
                         }
                     }
@@ -866,11 +868,11 @@ public class Client extends JFrame implements Serializable {
                     if (tiles.get(i).getPawn() != null) {
                         tiles.get(i).add(new JLabel(tiles.get(i).getPawn().getImage()));
                         if (tiles.get(i).getPos() == b) {
-                            tiles.get(i).getTile().getPawn().setCordinateOfPawn(b);
+                            tiles.get(i).getTile().getPawn().setCoordinateOfPawn(b);
                             board.setPawnOnBoard(b, tiles.get(i).getPawn());
                                     // change the position on the board of the two pawns 
                         } else {
-                            tiles.get(i).getTile().getPawn().setCordinateOfPawn(a);
+                            tiles.get(i).getTile().getPawn().setCoordinateOfPawn(a);
                             board.setPawnOnBoard(a, tiles.get(i).getPawn());
                         }
                     }
@@ -1016,7 +1018,7 @@ public class Client extends JFrame implements Serializable {
         tilesblue.get(b).add(new JLabel(pawn.getImage()));
         for (final TilePanel boardTile : tilesblue) {
             if (boardTile.getPos() == b) {
-                 this.bluePlayer.setCordinateofPawn(a, (b + 1) * (-1), p, !isClicked);
+                 this.bluePlayer.setCoordinateOfPawn(a, (b + 1) * (-1), p, !isClicked);
                 StartPane.add(boardTile);
             } else {
                 boardTile.drawTile();
@@ -1136,7 +1138,7 @@ public class Client extends JFrame implements Serializable {
                                     sourceTile = board.getTile(getPos());
                                     NumPanel = 0;
                                     MovedPawn = sourceTile.getPawn();
-                                    if (MovedPawn == null || !board.getCurrentPlayer().getAvailablePawns().contains(MovedPawn)) {
+                                    if (MovedPawn == null || !board.getCurrentPlayer().getLegalPawns().contains(MovedPawn)) {
                                         sourceTile = null;
                                         NumPanel = -1;
                                     } else {
@@ -1222,15 +1224,15 @@ public class Client extends JFrame implements Serializable {
                                            if (winner == null) {// if we have draw both pawns die
                                                 tiles.remove(move.getDestinationCoordinate());
                                                 tiles.add(move.getDestinationCoordinate(), new TilePanel(move.getDestinationCoordinate(), null, 0));
-                                                board.getCurrentPlayer().getOpponent().DeletePawn(temp.getPawn());
-                                                board.getCurrentPlayer().DeletePawn(move.getPawn());
+                                                board.getCurrentPlayer().getOpponent().deletePawn(temp.getPawn());
+                                                board.getCurrentPlayer().deletePawn(move.getPawn());
                                                 OpponentPane.removeAll();
                                                 int i = temp.getPawn().getTablePos();
                                                 tilesoppent.set(i, new TilePanel(i, temp.getPawn(), 1));
                                                 tilesoppent.get(i).add(new JLabel(temp.getPawn().getImage()));
                                                 for (final TilePanel boardTile : tilesoppent) {
                                                     if (boardTile.getPos() == i) {//update the opponent panel
-                                                        temp.getPawn().setCordinateOfPawn(-1);
+                                                        temp.getPawn().setCoordinateOfPawn(-1);
                                                         OpponentPane.add(boardTile);
                                                     } else {
                                                         boardTile.drawTile();
@@ -1247,7 +1249,7 @@ public class Client extends JFrame implements Serializable {
                                                 tilesblue.get(k).add(new JLabel(move.getPawn().getImage()));
                                                 for (final TilePanel boardTile : tilesblue) {
                                                     if (boardTile.getPos() == k) {
-                                                        move.getPawn().setCordinateOfPawn(-1);
+                                                        move.getPawn().setCoordinateOfPawn(-1);
                                                         StartPane.add(boardTile);
                                                     } else {
                                                         boardTile.drawTile();
@@ -1262,14 +1264,14 @@ public class Client extends JFrame implements Serializable {
                                             } else if (winner == move.getPawn()) {// if the player win
                                                 tiles.remove(move.getDestinationCoordinate());
                                                 tiles.add(move.getDestinationCoordinate(), new TilePanel(move.getDestinationCoordinate(), move.getPawn(), 0));
-                                                board.getCurrentPlayer().getOpponent().DeletePawn(temp.getPawn());
+                                                board.getCurrentPlayer().getOpponent().deletePawn(temp.getPawn());
                                                 OpponentPane.removeAll();// update the opponent panel
                                                 int i = temp.getPawn().getTablePos();
                                                 tilesoppent.set(i, new TilePanel(i, temp.getPawn(), 1));
                                                 tilesoppent.get(i).add(new JLabel(temp.getPawn().getImage()));
                                                 for (final TilePanel boardTile : tilesoppent) {
                                                     if (boardTile.getPos() == i) {
-                                                        temp.getPawn().setCordinateOfPawn(-1);
+                                                        temp.getPawn().setCoordinateOfPawn(-1);
                                                         OpponentPane.add(boardTile);
                                                     } else {
                                                         boardTile.drawTile();
@@ -1283,14 +1285,14 @@ public class Client extends JFrame implements Serializable {
                                             } else {// if the opponent win
                                                 tiles.remove(move.getDestinationCoordinate());
                                                 tiles.add(move.getDestinationCoordinate(), new TilePanel(move.getDestinationCoordinate(), temp.getPawn(), 0));
-                                                board.getCurrentPlayer().DeletePawn(move.getPawn());
+                                                board.getCurrentPlayer().deletePawn(move.getPawn());
                                                 StartPane.removeAll();// update the player hand panel
                                                 int k = move.getPawn().getTablePos();
                                                 tilesblue.set(k, new TilePanel(k, move.getPawn(), 1));
                                                 tilesblue.get(k).add(new JLabel(move.getPawn().getImage()));
                                                 for (final TilePanel boardTile : tilesblue) {
                                                     if (boardTile.getPos() == k) {
-                                                        move.getPawn().setCordinateOfPawn(-1);
+                                                        move.getPawn().setCoordinateOfPawn(-1);
                                                         StartPane.add(boardTile);
                                                     } else {
                                                         boardTile.drawTile();

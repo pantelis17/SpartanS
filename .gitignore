@@ -118,3 +118,12 @@ SpartanGit/spartan/target/maven-status/maven-compiler-plugin/compile/default-com
 SpartanGit/spartan/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst
 SpartanGit/spartan/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/createdFiles.lst
 SpartanGit/spartan/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/inputFiles.lst
+SpartanGit/spartan/target/classes/com/spartan/enumerations/Alliance.class
+SpartanGit/spartan/target/classes/com/spartan/enumerations/Alliance$1.class
+SpartanGit/spartan/target/classes/com/spartan/enumerations/Alliance$2.class
+SpartanGit/spartan/target/classes/com/spartan/enumerations/MoveStatus.class
+SpartanGit/spartan/target/classes/com/spartan/enumerations/MoveStatus$1.class
+SpartanGit/spartan/target/classes/com/spartan/enumerations/MoveStatus$2.class
+SpartanGit/spartan/target/classes/com/spartan/gui/Load.form
+SpartanGit/spartan/target/classes/com/spartan/gui/MainMenu.form
+SpartanGit/spartan/target/classes/com/spartan/gui/SinglePlayer.form

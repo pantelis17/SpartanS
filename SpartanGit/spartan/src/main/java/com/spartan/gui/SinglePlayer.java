@@ -18,17 +18,17 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
+import java.util.List;
 
-import com.spartan.Alliance;
 import com.spartan.board.Board;
 import com.spartan.board.Move;
 import com.spartan.board.Tile;
+import com.spartan.enumerations.Alliance;
 import com.spartan.pieces.Pawn;
 import com.spartan.player.BluePlayer;
 import com.spartan.player.MoveTransition;
 import com.spartan.player.RedPlayer;
 
-import static javax.swing.JFrame.EXIT_ON_CLOSE;
 import static javax.swing.SwingUtilities.updateComponentTreeUI;
 
 /**
@@ -93,14 +93,15 @@ public class SinglePlayer extends JFrame {
         setAlwaysOnTop(true);
         setResizable(false);
         Image t = new ImageIcon(getClass().getResource("/images/cursor.png")).getImage();
+        final var resizedCursorImage = t.getScaledInstance(100, 100, Image.SCALE_SMOOTH); // Set desired size here
         Toolkit toolkit = Toolkit.getDefaultToolkit();
-        Cursor cursor = toolkit.createCustomCursor(t, new Point(5, 5), "Custom Cursor");
+        Cursor cursor = toolkit.createCustomCursor(resizedCursorImage, new Point(5, 5), "Custom Cursor");
         setCursor(cursor);
-        setSize((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() + 10, (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight() + 5);
+        setSize((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth(), (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight() );
         jLabel1.setSize((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth() + 30) / 2, (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight() - 10);
         jPanel1.setSize((int) (Toolkit.getDefaultToolkit().getScreenSize().getWidth() + 12) / 2, (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight() - 20);
         ImageIcon background = new ImageIcon(getClass().getResource("/images/map.png"));
-        Image map = background.getImage().getScaledInstance((int) ((Toolkit.getDefaultToolkit().getScreenSize().getWidth() + 10) / 2),
+        Image map = background.getImage().getScaledInstance((int) ((Toolkit.getDefaultToolkit().getScreenSize().getWidth()) / 2),
                 (int) (Toolkit.getDefaultToolkit().getScreenSize().getHeight() + 10), Image.SCALE_SMOOTH);
         jLabel1.setIcon(new ImageIcon(map));
         setIconImage(logo);
@@ -158,7 +159,7 @@ public class SinglePlayer extends JFrame {
             for (int j = 0; j < 10; j++) {
                 if (!alliance.isBlue()) {
                     tilesred.add(new TilePanel(i * 10 + j, this.redPlayer.getPawnOfStack(i * 10 + j), 1));
-                    this.redPlayer.setCordinateofPawn(i * 10 + j, (i * 10 + j + 1) * (-1), 1, !isClicked);
+                    this.redPlayer.setCoordinateOfPawn(i * 10 + j, (i * 10 + j + 1) * (-1), 1, !isClicked);
                     tilesred.get(i * 10 + j).setLayout(new BorderLayout());
                     tilesred.get(i * 10 + j).setBorder(BorderFactory.createLineBorder(Color.GRAY));
                     this.redPlayer.getPawnOfStack(i * 10 + j).setSide(true);
@@ -166,7 +167,7 @@ public class SinglePlayer extends JFrame {
                     tilesred.get(i * 10 + j).setBackground(new Color(0, 0, 0, 0));
                 } else {
                     tilesred.add(new TilePanel(i * 10 + j, this.bluePlayer.getPawnOfStack(i * 10 + j), 1));
-                    this.bluePlayer.setCordinateofPawn(i * 10 + j, (i * 10 + j + 1) * (-1), 1, !isClicked);
+                    this.bluePlayer.setCoordinateOfPawn(i * 10 + j, (i * 10 + j + 1) * (-1), 1, !isClicked);
                     tilesred.get(i * 10 + j).setLayout(new BorderLayout());
                     tilesred.get(i * 10 + j).setBorder(BorderFactory.createLineBorder(Color.GRAY));
                     this.bluePlayer.getPawnOfStack(i * 10 + j).setSide(true);
@@ -271,7 +272,7 @@ public class SinglePlayer extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if ((board.getCurrentPlayer().getAlliance().isBlue() == alliance.isBlue()) && !Start) {
-                    Move move = board.getCurrentPlayer().BotMove(board.getGameBoard());
+                    Move move = board.getCurrentPlayer().botMove(board.getGameBoard());
                     tiles.get(move.getCurrentCoordinate()).setBackground(new Color(255, 0, 0, 50));
                     tiles.get(move.getDestinationCoordinate()).setBackground(new Color(255, 0, 0, 50));
                     jPanel1.removeAll();
@@ -463,11 +464,11 @@ public class SinglePlayer extends JFrame {
     }
 
     private void Random(Alliance a) {
-        ArrayList<Pawn> rand = new ArrayList<>();
+        List<Pawn> rand;
         int min, max;
         if (!alliance.isBlue()) {
             if (!a.isBlue()) {
-                rand = redPlayer.Random();
+                rand = redPlayer.random();
                 min = 60;
                 max = 100;
 
@@ -482,13 +483,13 @@ public class SinglePlayer extends JFrame {
                 StartPane.repaint();
                 StartPane.updateUI();
             } else {
-                rand = bluePlayer.Random();
+                rand = bluePlayer.random();
                 min = 0;
                 max = 40;
             }
         } else {
             if (a.isBlue()) {
-                rand = bluePlayer.Random();
+                rand = bluePlayer.random();
                 min = 0;
                 max = 40;
 
@@ -503,7 +504,7 @@ public class SinglePlayer extends JFrame {
                 StartPane.repaint();
                 StartPane.updateUI();
             } else {
-                rand = redPlayer.Random();
+                rand = redPlayer.random();
                 min = 60;
                 max = 100;
             }
@@ -530,7 +531,7 @@ public class SinglePlayer extends JFrame {
     private void MoveOfTheBot() {
         board.changeCurrentPlayer();
         GamePlay();
-        final Move move = board.getCurrentPlayer().BotMove(board.getGameBoard());
+        final Move move = board.getCurrentPlayer().botMove(board.getGameBoard());
         final MoveTransition transition = board.getCurrentPlayer().makeMove(move);
         board = transition.getToBoard();
         TilePanel temp = tiles.get(move.getDestinationCoordinate());
@@ -544,8 +545,8 @@ public class SinglePlayer extends JFrame {
             if (winner == null) {
                 tiles.remove(move.getDestinationCoordinate());
                 tiles.add(move.getDestinationCoordinate(), new TilePanel(move.getDestinationCoordinate(), null, 0));
-                board.getCurrentPlayer().getOpponent().DeletePawn(temp.getPawn());
-                board.getCurrentPlayer().DeletePawn(move.getPawn());
+                board.getCurrentPlayer().getOpponent().deletePawn(temp.getPawn());
+                board.getCurrentPlayer().deletePawn(move.getPawn());
                 OpponentPane.removeAll();
                 int k = move.getPawn().getTablePos();
                 tilesoppent.set(k, new TilePanel(k, move.getPawn(), 1));
@@ -571,7 +572,7 @@ public class SinglePlayer extends JFrame {
                 tilesred.get(i).add(new JLabel(temp.getPawn().getImage()));
                 for (final TilePanel boardTile : tilesred) {
                     if (boardTile.getPos() == i) {
-                        temp.getPawn().setCordinateOfPawn(-1);
+                        temp.getPawn().setCoordinateOfPawn(-1);
                         StartPane.add(boardTile);
                     } else {
                         boardTile.drawTile();
@@ -585,14 +586,14 @@ public class SinglePlayer extends JFrame {
             } else if (winner == move.getPawn()) {
                 tiles.remove(move.getDestinationCoordinate());
                 tiles.add(move.getDestinationCoordinate(), new TilePanel(move.getDestinationCoordinate(), move.getPawn(), 0));
-                board.getCurrentPlayer().getOpponent().DeletePawn(temp.getPawn());
+                board.getCurrentPlayer().getOpponent().deletePawn(temp.getPawn());
                 StartPane.removeAll();
                 int i = temp.getPawn().getTablePos();
                 tilesred.set(i, new TilePanel(i, temp.getPawn(), 1));
                 tilesred.get(i).add(new JLabel(temp.getPawn().getImage()));
                 for (final TilePanel boardTile : tilesred) {
                     if (boardTile.getPos() == i) {
-                        temp.getPawn().setCordinateOfPawn(-1);
+                        temp.getPawn().setCoordinateOfPawn(-1);
                         StartPane.add(boardTile);
                     } else {
                         boardTile.drawTile();
@@ -606,7 +607,7 @@ public class SinglePlayer extends JFrame {
             } else {
                 tiles.remove(move.getDestinationCoordinate());
                 tiles.add(move.getDestinationCoordinate(), new TilePanel(move.getDestinationCoordinate(), temp.getPawn(), 0));
-                board.getCurrentPlayer().DeletePawn(move.getPawn());
+                board.getCurrentPlayer().deletePawn(move.getPawn());
                 OpponentPane.removeAll();
                 int k = move.getPawn().getTablePos();
                 tilesoppent.set(k, new TilePanel(k, move.getPawn(), 1));
@@ -702,7 +703,7 @@ public class SinglePlayer extends JFrame {
                 if (tiles.get(i).getPos() == b) {
                     if (tiles.get(i).getPawn() != null) {
                         tiles.get(i).add(new JLabel(tiles.get(i).getPawn().getImage()));
-                        tiles.get(i).getTile().getPawn().setCordinateOfPawn(b);
+                        tiles.get(i).getTile().getPawn().setCoordinateOfPawn(b);
                     }
                     board.setPawnOnBoard(b, tiles.get(i).getPawn());
                 } else {
@@ -714,11 +715,11 @@ public class SinglePlayer extends JFrame {
                     if (tiles.get(i).getPawn() != null) {
                         tiles.get(i).add(new JLabel(tiles.get(i).getPawn().getImage()));
                         if (tiles.get(i).getPos() == b) {
-                            tiles.get(i).getTile().getPawn().setCordinateOfPawn(b);
+                            tiles.get(i).getTile().getPawn().setCoordinateOfPawn(b);
                             board.setPawnOnBoard(b, tiles.get(i).getPawn());
 
                         } else {
-                            tiles.get(i).getTile().getPawn().setCordinateOfPawn(a);
+                            tiles.get(i).getTile().getPawn().setCoordinateOfPawn(a);
                             board.setPawnOnBoard(a, tiles.get(i).getPawn());
                         }
                     }
@@ -873,7 +874,7 @@ public class SinglePlayer extends JFrame {
         for (final TilePanel boardTile : tilesred) {
 
             if (boardTile.getPos() == b) {
-                this.board.getCurrentPlayer().setCordinateofPawn(a, (b + 1) * (-1), p, !isClicked);
+                this.board.getCurrentPlayer().setCoordinateOfPawn(a, (b + 1) * (-1), p, !isClicked);
                 StartPane.add(boardTile);
             } else {
                 boardTile.drawTile();
@@ -890,12 +891,12 @@ public class SinglePlayer extends JFrame {
     }
 
     private void GamePlay() {
-        this.board.getCurrentPlayer().calculateLegalMoves(board);//.setLegalMoves(this.board.getCurrentPlayer().calculateLegalMoves(this.board.getCurrentPlayer().getActivePawns().getStack(), board));
-        this.board.getCurrentPlayer().getOpponent().calculateLegalMoves(board);//.setLegalMoves(this.board.getCurrentPlayer().getOpponent().calculateLegalMoves(this.board.getCurrentPlayer().getOpponent().getActivePawns().getStack(), board));
-        if (redPlayer.getAvailablePawns().isEmpty() && bluePlayer.getAvailablePawns().isEmpty()) {
+        this.board.getCurrentPlayer().calculateLegalMoves(board);
+        this.board.getCurrentPlayer().getOpponent().calculateLegalMoves(board);
+        if (redPlayer.getLegalPawns().isEmpty() && bluePlayer.getLegalPawns().isEmpty()) {
             Draw = true;
             EndGame = true;
-        } else if (redPlayer.getAvailablePawns().isEmpty()) {
+        } else if (redPlayer.getLegalPawns().isEmpty()) {
             EndGame = true;
 
             if (alliance.isBlue()) {
@@ -903,7 +904,7 @@ public class SinglePlayer extends JFrame {
             } else {
                 Winner = false;
             }
-        } else if (bluePlayer.getAvailablePawns().isEmpty()) {
+        } else if (bluePlayer.getLegalPawns().isEmpty()) {
 
             EndGame = true;
 
@@ -1067,7 +1068,7 @@ public class SinglePlayer extends JFrame {
                                     NumPanel = 0;
                                     MovedPawn = sourceTile.getPawn();
 
-                                    if (MovedPawn == null || !board.getCurrentPlayer().getAvailablePawns().contains(MovedPawn)) {
+                                    if (MovedPawn == null || !board.getCurrentPlayer().getLegalPawns().contains(MovedPawn)) {
                                         sourceTile = null;
                                         NumPanel = -1;
                                     } else {
@@ -1144,15 +1145,15 @@ public class SinglePlayer extends JFrame {
                                             if (winner == null) {
                                                 tiles.remove(move.getDestinationCoordinate());
                                                 tiles.add(move.getDestinationCoordinate(), new TilePanel(move.getDestinationCoordinate(), null, 0));
-                                                board.getCurrentPlayer().getOpponent().DeletePawn(temp.getPawn());
-                                                board.getCurrentPlayer().DeletePawn(move.getPawn());
+                                                board.getCurrentPlayer().getOpponent().deletePawn(temp.getPawn());
+                                                board.getCurrentPlayer().deletePawn(move.getPawn());
                                                 OpponentPane.removeAll();
                                                 int i = temp.getPawn().getTablePos();
                                                 tilesoppent.set(i, new TilePanel(i, temp.getPawn(), 1));
                                                 tilesoppent.get(i).add(new JLabel(temp.getPawn().getImage()));
                                                 for (final TilePanel boardTile : tilesoppent) {
                                                     if (boardTile.getPos() == i) {
-                                                        temp.getPawn().setCordinateOfPawn(-1);
+                                                        temp.getPawn().setCoordinateOfPawn(-1);
                                                         OpponentPane.add(boardTile);
                                                     } else {
                                                         boardTile.drawTile();
@@ -1169,7 +1170,7 @@ public class SinglePlayer extends JFrame {
                                                 tilesred.get(k).add(new JLabel(move.getPawn().getImage()));
                                                 for (final TilePanel boardTile : tilesred) {
                                                     if (boardTile.getPos() == k) {
-                                                        move.getPawn().setCordinateOfPawn(-1);
+                                                        move.getPawn().setCoordinateOfPawn(-1);
                                                         StartPane.add(boardTile);
                                                     } else {
                                                         boardTile.drawTile();
@@ -1184,14 +1185,14 @@ public class SinglePlayer extends JFrame {
                                             } else if (winner == move.getPawn()) {
                                                 tiles.remove(move.getDestinationCoordinate());
                                                 tiles.add(move.getDestinationCoordinate(), new TilePanel(move.getDestinationCoordinate(), move.getPawn(), 0));
-                                                board.getCurrentPlayer().getOpponent().DeletePawn(temp.getPawn());
+                                                board.getCurrentPlayer().getOpponent().deletePawn(temp.getPawn());
                                                 OpponentPane.removeAll();
                                                 int i = temp.getPawn().getTablePos();
                                                 tilesoppent.set(i, new TilePanel(i, temp.getPawn(), 1));
                                                 tilesoppent.get(i).add(new JLabel(temp.getPawn().getImage()));
                                                 for (final TilePanel boardTile : tilesoppent) {
                                                     if (boardTile.getPos() == i) {
-                                                        temp.getPawn().setCordinateOfPawn(-1);
+                                                        temp.getPawn().setCoordinateOfPawn(-1);
                                                         OpponentPane.add(boardTile);
                                                     } else {
                                                         boardTile.drawTile();
@@ -1205,14 +1206,14 @@ public class SinglePlayer extends JFrame {
                                             } else {
                                                 tiles.remove(move.getDestinationCoordinate());
                                                 tiles.add(move.getDestinationCoordinate(), new TilePanel(move.getDestinationCoordinate(), temp.getPawn(), 0));
-                                                board.getCurrentPlayer().DeletePawn(move.getPawn());
+                                                board.getCurrentPlayer().deletePawn(move.getPawn());
                                                 StartPane.removeAll();
                                                 int k = move.getPawn().getTablePos();
                                                 tilesred.set(k, new TilePanel(k, move.getPawn(), 1));
                                                 tilesred.get(k).add(new JLabel(move.getPawn().getImage()));
                                                 for (final TilePanel boardTile : tilesred) {
                                                     if (boardTile.getPos() == k) {
-                                                        move.getPawn().setCordinateOfPawn(-1);
+                                                        move.getPawn().setCoordinateOfPawn(-1);
                                                         StartPane.add(boardTile);
                                                     } else {
                                                         boardTile.drawTile();

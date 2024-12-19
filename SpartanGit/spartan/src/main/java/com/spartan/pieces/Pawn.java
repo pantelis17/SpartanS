@@ -11,8 +11,8 @@ import java.io.Serializable;
 import java.util.List;
 import javax.swing.ImageIcon;
 
-import com.spartan.Alliance;
 import com.spartan.board.*;
+import com.spartan.enumerations.Alliance;
 
 /**
  * This is the parent class which contains functions vital for the right work  of the pawns.
@@ -54,8 +54,8 @@ public abstract class Pawn implements Serializable {
         return this.tablePosition;
     }
 
-    public void setCordinateOfPawn(int cordinate) {
-        this.positionOfPawn = cordinate;
+    public void setCoordinateOfPawn(int coordinate) {
+        this.positionOfPawn = coordinate;
     }
 
     public boolean getSide(){

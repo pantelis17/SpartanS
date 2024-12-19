@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.spartan.Alliance;
+import com.spartan.enumerations.Alliance;
 import com.spartan.pieces.Pawn;
 import com.spartan.player.BluePlayer;
 import com.spartan.player.Player;

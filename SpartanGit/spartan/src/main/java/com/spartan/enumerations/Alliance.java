@@ -1,4 +1,4 @@
-package com.spartan;
+package com.spartan.enumerations;
 
 /**
  * This enum contain the function we need to determine important information 

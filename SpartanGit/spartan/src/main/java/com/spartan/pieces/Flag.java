@@ -5,9 +5,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.spartan.Alliance;
 import com.spartan.board.Board;
 import com.spartan.board.Move;
+import com.spartan.enumerations.Alliance;
 
 
 /**

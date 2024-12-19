@@ -9,7 +9,7 @@ public class Main {
             public void run() {
                 a = new MainMenu();//initialize this item
                 a.setVisible(true);//set the jFrame visible
-                a.main();//call the main mathod from the MainMenu class
+                a.main();//call the main method from the MainMenu class
             }
         });
     }

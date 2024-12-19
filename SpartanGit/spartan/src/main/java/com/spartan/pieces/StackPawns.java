@@ -8,7 +8,7 @@ package com.spartan.pieces;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import com.spartan.Alliance;
+import com.spartan.enumerations.Alliance;
 
 /**
  * This class is used to create the hands for the both players.

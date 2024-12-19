@@ -10,12 +10,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.spartan.Alliance;
 import com.spartan.board.Board;
 import com.spartan.board.BoardUtilities;
 import com.spartan.board.Move;
 import com.spartan.board.Tile;
 import com.spartan.board.Move.*;
+import com.spartan.enumerations.Alliance;
 
 /**
  * This Class is used to initialize every pawn which can be moved only 1 square per turn.

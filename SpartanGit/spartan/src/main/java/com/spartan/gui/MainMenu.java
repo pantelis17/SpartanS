@@ -35,7 +35,7 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-import com.spartan.Alliance;
+import com.spartan.enumerations.Alliance;
 import com.spartan.networksocket.Client;
 import com.spartan.networksocket.Server;
 
@@ -60,19 +60,20 @@ public class MainMenu extends javax.swing.JFrame {
         setAlwaysOnTop(true);
         setResizable(false);
         Image t = new ImageIcon(getClass().getResource("/images/cursor.png")).getImage();
+        final var resizedCursorImage = t.getScaledInstance(100, 100, Image.SCALE_SMOOTH); // Set desired size here
         Toolkit toolkit = Toolkit.getDefaultToolkit();
-        Cursor cursor = toolkit.createCustomCursor(t, new Point(5, 5), "Custom Cursor");
+        Cursor cursor = toolkit.createCustomCursor(resizedCursorImage, new Point(5, 5), "Custom Cursor");
         setCursor(cursor);
-        setSize((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() + 10, (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight() + 5);
-        jLabel1.setSize((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() + 10, (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight() + 5);
+        setSize((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth(), (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight());
+        jLabel1.setSize((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth(), (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight() );
         jLabel1.setLocation(-3, 0);
-        jPanel1.setSize((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() + 10, (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight() + 5);
+        jPanel1.setSize((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth(), (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight() );
         jPanel1.setLocation(-3, 0);
         jPanel1.setBackground(new Color(0, 0, 0, 0));// so in will be transparenti
         setIconImage(logo);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         ImageIcon img = new ImageIcon(getClass().getResource("/images/map.png"));
-        Image img1 = img.getImage().getScaledInstance((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() + 10, (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight() + 5, Image.SCALE_SMOOTH);
+        Image img1 = img.getImage().getScaledInstance((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth(), (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight() , Image.SCALE_SMOOTH);
         jLabel1.setIcon(new ImageIcon(img1));
         JButton Single = new JButton("Single");
         ImageIcon button2 = new ImageIcon(getClass().getResource("/images/singleplayerbutton.png"));

@@ -14,31 +14,29 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-public class Load extends javax.swing.JFrame implements Runnable {
+public class Load extends JFrame implements Runnable {
 
     /**
      * Creates new form Load
      */
     public Load() {
         initComponents();
-        Image logo = new ImageIcon(getClass().getResource("/images/logo.png")).getImage();
+        final var logo = new ImageIcon(getClass().getResource("/images/logo.png")).getImage();
         setAlwaysOnTop(true);
         setResizable(false);
         setLocation(-3,0);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setIconImage(logo);
-        Image t = new ImageIcon(getClass().getResource("/images/cursor.png")).getImage();
-        Toolkit toolkit = Toolkit.getDefaultToolkit();
-        Cursor cursor = toolkit.createCustomCursor(t, new Point(5, 5), "Custom Cursor");
+        final var t = new ImageIcon(getClass().getResource("/images/cursor.png")).getImage();
+        final var resizedCursorImage = t.getScaledInstance(100, 100, Image.SCALE_SMOOTH); // Set desired size here
+        final var toolkit = Toolkit.getDefaultToolkit();
+        final var cursor = toolkit.createCustomCursor(resizedCursorImage, new Point(5, 5), "Custom Cursor");
         setCursor(cursor);
-        setSize((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() + 10, (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight() + 5);
-
-            JPanel jPanel1 = new JPanel();
-            jPanel1.setBackground(Color.DARK_GRAY);
-            jPanel1.setSize((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() + 10, (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight() + 5);
-
-            add(jPanel1);
-            
+        setSize((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth(), (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight());
+        final var jPanel1 = new JPanel();
+        jPanel1.setBackground(Color.DARK_GRAY);
+        jPanel1.setSize((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth(), (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight());
+        add(jPanel1);
     }
 
     /**
@@ -73,18 +71,18 @@ public class Load extends javax.swing.JFrame implements Runnable {
 
     @Override
     public void run() {
-                Image logo = new ImageIcon(getClass().getResource("/images/logo.png")).getImage();
         setAlwaysOnTop(true);
         setResizable(false);
         Image t = new ImageIcon(getClass().getResource("/images/cursor.png")).getImage();
+        final var resizedCursorImage = t.getScaledInstance(100, 100, Image.SCALE_SMOOTH); // Set desired size here
         Toolkit toolkit = Toolkit.getDefaultToolkit();
-        Cursor cursor = toolkit.createCustomCursor(t, new Point(5, 5), "Custom Cursor");
+        Cursor cursor = toolkit.createCustomCursor(resizedCursorImage, new Point(5, 5), "Custom Cursor");
         setCursor(cursor);
-        setSize((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() + 10, (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight() + 5);
+        setSize((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth(), (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight());
 
             JPanel jPanel1 = new JPanel();
             jPanel1.setBackground(Color.yellow);
-            jPanel1.setSize((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() + 10, (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight() + 5);
+            jPanel1.setSize((int) Toolkit.getDefaultToolkit().getScreenSize().getWidth(), (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight());
             add(jPanel1);
             this.setVisible(true);
     }
