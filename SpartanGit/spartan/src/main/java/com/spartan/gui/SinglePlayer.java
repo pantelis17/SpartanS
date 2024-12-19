@@ -468,7 +468,7 @@ public class SinglePlayer extends JFrame {
         int min, max;
         if (!alliance.isBlue()) {
             if (!a.isBlue()) {
-                rand = redPlayer.random();
+                rand = redPlayer.initRandomPlacement();
                 min = 60;
                 max = 100;
 
@@ -483,13 +483,13 @@ public class SinglePlayer extends JFrame {
                 StartPane.repaint();
                 StartPane.updateUI();
             } else {
-                rand = bluePlayer.random();
+                rand = bluePlayer.initRandomPlacement();
                 min = 0;
                 max = 40;
             }
         } else {
             if (a.isBlue()) {
-                rand = bluePlayer.random();
+                rand = bluePlayer.initRandomPlacement();
                 min = 0;
                 max = 40;
 
@@ -504,7 +504,7 @@ public class SinglePlayer extends JFrame {
                 StartPane.repaint();
                 StartPane.updateUI();
             } else {
-                rand = redPlayer.random();
+                rand = redPlayer.initRandomPlacement();
                 min = 60;
                 max = 100;
             }
@@ -1086,7 +1086,7 @@ public class SinglePlayer extends JFrame {
                                 destinationTile = board.getTile(getPos());
                                 if (Start) {
                                     if (!tiles.get(destinationTile.getTileCordinates()).getTile().isTileOccupied()) {
-                                        if (board.getCurrentPlayer().getStart().contains(destinationTile.getTileCordinates())) {
+                                        if (board.getCurrentPlayer().getStartMove().contains(destinationTile.getTileCordinates())) {
                                             tiles.remove(destinationTile.getTileCordinates());
                                             tiles.add(destinationTile.getTileCordinates(), new TilePanel(destinationTile.getTileCordinates(), sourceTile.getPawn(), 0));
                                            

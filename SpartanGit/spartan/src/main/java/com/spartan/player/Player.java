@@ -12,6 +12,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import com.spartan.board.Board;
 import com.spartan.board.Move;
@@ -34,53 +36,149 @@ public abstract class Player implements Serializable {
     //fields.
     @Setter
     protected Board board;
-    protected Random randomGenerator; 
-    @Getter
-    @Setter
-    private List<Move> legalMoves;
-    @Getter
-    @Setter
-    private List<Pawn> legalPawns;
+    protected Random randomGenerator;
+    private int startDeck;
+    private int endDeck;
+    @Getter private List<Integer> startMove;
+    @Getter @Setter private List<Pawn> activePawns;
+    @Getter @Setter private List<Move> legalMoves;
+    @Getter @Setter private List<Pawn> legalPawns;
 
-    /**
-     * Contructor
-     *
-     * @param board , the Board of the game.
-     */
-    Player(Board board) {
+    protected Player(Board board, List<Pawn> activePawns, int startDeck, int endDeck) {
         this.board = board;
+        this.activePawns = activePawns;
         this.randomGenerator = new Random();
         this.legalMoves = new ArrayList<>();
         this.legalPawns = new ArrayList<>();
+        this.startDeck = startDeck;
+        this.endDeck = endDeck;
+        this.startMove = IntStream.range(startDeck, endDeck)
+                .boxed()
+                .toList();
     }
 
     //Abstract methods . Implemented in Subclasses RedPlayer and Blue . See more info there...
-    //--------------------------------------------------------------------------------------------//  
-    public abstract List<Pawn> getActivePawns();
-
+    //--------------------------------------------------------------------------------------------// 
     public abstract Alliance getAlliance();
 
     public abstract Player getOpponent();
-
-    public abstract List<Integer> calculateStartMove();
-
-    public abstract List<Integer> getStart();
-
-    public abstract void deletePawn(Pawn p);
-
-    public abstract List<Pawn> random();
-
-    public abstract void setStack(List<Pawn> p);
-
-    public abstract void setCoordinateOfPawn(int pos, int coordinate, int panel, boolean start);
     //--------------------------------------------------------------------------------------------//  
+
+    /**
+     * This function is used to create the set of the board for the bluePlayer
+     * 
+     * @return a new arraylist with the new coordinates of the pawns
+     */
+    public List<Pawn> initRandomPlacement() {
+        final var random = new ArrayList<Pawn>();
+        final var coordinate = new ArrayList<Integer>(); // Arraylist of the coordinates 
+        final var isBlueAlliance = getAlliance().isBlue();
+        int[] proposalsForBomb = { -1, 1, -10, 10, 9, 11, -9, -11 }; //Array with candidate places for the bomb
+        int cor;
+        int flag = -1;
+        int bombs = 3; //Initializing the number of the pawns
+        int spies = 4;
+        for (var i = startDeck; i < endDeck; i++) {
+            coordinate.add(i); //Adding the pawns in the coordinate ArrayList
+        }
+        for (final var pawn : activePawns) { // // Iteration to calculate the places of the pawns
+            if (pawn.getValue() == -1) { //  calculate the place of the  flag
+                cor = (isBlueAlliance ? 0 : 80) + randomGenerator.nextInt(isBlueAlliance ? 19 : 20);
+                coordinate.remove(Integer.valueOf(cor));
+                flag = cor;
+                pawn.setCoordinateOfPawn(cor);
+            } else if (pawn.getValue() == 0) { // calculate the place of the bomb
+                if (bombs > 0) {
+                    do {
+                        cor = proposalsForBomb[randomGenerator.nextInt(proposalsForBomb.length)] + flag;
+                        if (coordinate.contains(cor)) { // Placing the bombs in the candidate positions 
+                            pawn.setCoordinateOfPawn(cor);
+                        }
+                    } while (!coordinate.contains(cor));
+                    coordinate.remove(Integer.valueOf(cor)); //Placing all the bombs until all are placed
+                    bombs--;
+                } else {
+                    do {
+                        cor = (isBlueAlliance ? 0 : 60) + randomGenerator.nextInt(40);
+                        if (coordinate.contains(cor)) {
+                            pawn.setCoordinateOfPawn(cor);
+                        }
+                    } while (!coordinate.contains(cor));
+                    coordinate.remove(Integer.valueOf(cor));
+
+                }
+
+            } else if (pawn.getValue() == 2) { // calculate the place of the spies 
+                if (spies > 0) {
+                    do {
+                        cor = (isBlueAlliance ? 0 : 60) + randomGenerator.nextInt(40);
+                        if (coordinate.contains(cor) && (isBlueAlliance ? cor >= 20 : cor < 80)) {
+                            pawn.setCoordinateOfPawn(cor);
+                        }
+                    } while (!coordinate.contains(cor) || (isBlueAlliance ? cor < 20 : cor >= 80)); //Placing all the spies until all are placed
+                    coordinate.remove(Integer.valueOf(cor));
+                    spies--;
+                } else {
+                    do {
+                        cor = (isBlueAlliance ? 0 : 60) + randomGenerator.nextInt(40);
+                        if (coordinate.contains(cor)) {
+                            pawn.setCoordinateOfPawn(cor);
+                        }
+                    } while (!coordinate.contains(cor));
+                    coordinate.remove(Integer.valueOf(cor));
+
+                }
+            } else {
+                do {
+                    cor = (isBlueAlliance ? 0 : 60) + randomGenerator.nextInt(40);
+                    if (coordinate.contains(cor)) {
+                        pawn.setCoordinateOfPawn(cor);
+                    }
+                } while (!coordinate.contains(cor));
+                coordinate.remove(Integer.valueOf(cor));
+            }
+            random.add(pawn); // Adding the pawns by random order
+        }
+        for (final var pawn : random) {
+            this.board.setPawnOnBoard(pawn.getPositionOfPawn(), pawn); //Iteration of placing the pawns on the board
+        }
+        this.board.toStringBoard(); //Getting the coordinates 
+        this.setActivePawns(random);
+        return random; //returns the random values
+    }
+
+    //Method that sets the position and the coordinates of the pawns on the panel of the game
+    public void setCoordinateOfPawn(int pos, int coordinate, int panel, boolean start) {
+        if (panel == 0) {
+            var position = 0;
+            for (final var pawn : activePawns) {
+                if (pawn.getPositionOfPawn() == pos) { //Calculating the coordinates
+                    break;
+                } else {
+                    position++;
+                }
+            }
+            this.activePawns.get(position).setCoordinateOfPawn(coordinate); //Getting the position and the coordinates
+        } else {
+            if (start) {
+                this.activePawns.get(pos).setCoordinateOfPawn(coordinate);
+            } else {
+                var position = 0;
+                for (final var pawn : this.activePawns) {
+                    if ((pawn.getPositionOfPawn() + 1) * (-1) == pos) { // numerical operation to calculate the position
+                        break;
+                    } else {
+                        position++;
+                    }
+                }
+                this.activePawns.get(position).setCoordinateOfPawn(coordinate); //Getting the position and the coordinates
+
+            }
+        }
+    }
 
     private boolean isLegalMove(final Move move) {
         return legalMoves.contains(move);
-    }
-
-    private boolean isLegalPawn(final Pawn pawn) {
-        return legalPawns.contains(pawn);
     }
 
     /**
@@ -164,5 +262,13 @@ public abstract class Player implements Serializable {
             }
         }
         this.legalMoves = legals;
+    }
+
+    public Pawn getPawnOfStack(int pos) {
+        return activePawns.get(pos);
+    }
+
+    public void deletePawn(Pawn p) {
+        activePawns.remove(p);
     }
 }

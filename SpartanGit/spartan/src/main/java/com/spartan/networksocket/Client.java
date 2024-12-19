@@ -615,7 +615,7 @@ public class Client extends JFrame implements Serializable {
         List<Pawn> rand;
         int min, max;
         if (a.isBlue()) {
-            rand = bluePlayer.random();
+            rand = bluePlayer.initRandomPlacement();
             min = 0;//the minimun position on the board
             max = 40;//the maximun position on the board
             StartPane.removeAll();
@@ -633,7 +633,7 @@ public class Client extends JFrame implements Serializable {
             for (Pawn pawn : rand) {
                 pawn.setSide(false);//set the opponent side
             }
-            redPlayer.setStack(rand);
+            redPlayer.setActivePawns(rand);
 
             for (Pawn pawn : rand) {
                 this.board.setPawnOnBoard(pawn.getPositionOfPawn(), pawn);//set every pawn on the board
@@ -1155,7 +1155,7 @@ public class Client extends JFrame implements Serializable {
                                 destinationTile = board.getTile(getPos());
                                 if (Start) {
                                     if (!tiles.get(destinationTile.getTileCordinates()).getTile().isTileOccupied()) {
-                                        if (board.getCurrentPlayer().getStart().contains(destinationTile.getTileCordinates())) {
+                                        if (board.getCurrentPlayer().getStartMove().contains(destinationTile.getTileCordinates())) {
                                           tiles.remove(destinationTile.getTileCordinates());
                                             tiles.add(destinationTile.getTileCordinates(), new TilePanel(destinationTile.getTileCordinates(), sourceTile.getPawn(), 0));
                                             SwingUtilities.invokeLater(new Runnable() {

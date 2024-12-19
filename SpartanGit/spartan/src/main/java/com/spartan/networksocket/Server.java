@@ -544,7 +544,7 @@ public class Server extends JFrame implements Serializable {
         List<Pawn> rand = new ArrayList<Pawn>(); //Arraylist of the random order of pawns 
         int min, max;
         if (!a.isBlue()) {
-            rand = redPlayer.random(); //random orde for the red player 
+            rand = redPlayer.initRandomPlacement(); //random orde for the red player 
             min = 60;
             max = 100;
             StartPane.removeAll();
@@ -564,7 +564,7 @@ public class Server extends JFrame implements Serializable {
                 for (Pawn pawn : rand) {
                     pawn.setSide(false);
                 }
-                bluePlayer.setStack(rand);
+                bluePlayer.setActivePawns(rand);
                 for (Pawn pawn : rand) { //Setting the pawns in their board position 
                     this.board.setPawnOnBoard(pawn.getPositionOfPawn(), pawn);
                 }
@@ -1187,7 +1187,7 @@ public class Server extends JFrame implements Serializable {
                                 destinationTile = board.getTile(getPos());
                                 if (Start) {
                                     if (!tiles.get(destinationTile.getTileCordinates()).getTile().isTileOccupied()) {
-                                        if (board.getCurrentPlayer().getStart()
+                                        if (board.getCurrentPlayer().getStartMove()
                                                 .contains(destinationTile.getTileCordinates())) {
                                             tiles.remove(destinationTile.getTileCordinates());
                                             tiles.add(destinationTile.getTileCordinates(), new TilePanel(
