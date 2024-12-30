@@ -1,7 +1,6 @@
 
 package com.spartan.pieces;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,7 +12,7 @@ import com.spartan.enumerations.Alliance;
 /**
  *This class is used to initialize the Bomb pawn
  */
-public class Bomb extends Pawn implements Serializable{
+public class Bomb extends Pawn {
     /**
      * 
      * @param position is the position which it has on the board
@@ -22,7 +21,7 @@ public class Bomb extends Pawn implements Serializable{
      * which this pawn will return if it die.
      */
     public Bomb(final int position , final Alliance alliance,final int pos){
-        super(position,alliance,0,pos);
+        super(position, alliance, 0, pos);
     }
     
     

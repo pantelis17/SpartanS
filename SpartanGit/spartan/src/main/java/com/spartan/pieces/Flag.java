@@ -1,7 +1,6 @@
 
 package com.spartan.pieces;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,7 +12,7 @@ import com.spartan.enumerations.Alliance;
 /**
  * This class is used to initialize the flag.
  */
-public class Flag extends Pawn implements Serializable{
+public class Flag extends Pawn {
     
     /**
      * 
@@ -21,7 +20,7 @@ public class Flag extends Pawn implements Serializable{
      * @param alliance is the alliance of the flag. ( The color of the flag )
      */
     public Flag(final int position , final Alliance alliance){
-        super(position,alliance,-1,0);
+        super(position, alliance, -1, 0);
     }
     
     @Override

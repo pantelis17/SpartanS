@@ -86,7 +86,7 @@ public abstract class Player implements Serializable {
         for (final var pawn : activePawns) {
             if (pawn.getValue() == -1) { 
                 flag = placeFlag(isBlueAlliance, coordinate);
-                pawn.setCoordinateOfPawn(flag);
+                pawn.setPositionOfPawn(flag);
             } else if (pawn.getValue() == 0) { 
                 placeBomb(pawn, coordinate, proposalsForBomb, flag, bombs, isBlueAlliance);
                 bombs--;
@@ -123,12 +123,12 @@ public abstract class Player implements Serializable {
             do {
                 cor = proposalsForBomb[randomGenerator.nextInt(proposalsForBomb.length)] + flag;
             } while (!coordinate.contains(cor)); // Find valid position
-            pawn.setCoordinateOfPawn(cor);
+            pawn.setPositionOfPawn(cor);
         } else {
             do {
                 cor = (isBlueAlliance ? 0 : 60) + randomGenerator.nextInt(40);
             } while (!coordinate.contains(cor)); // Find valid position
-            pawn.setCoordinateOfPawn(cor);
+            pawn.setPositionOfPawn(cor);
         }
         coordinate.remove(Integer.valueOf(cor)); // Remove selected coordinate
     }
@@ -140,12 +140,12 @@ public abstract class Player implements Serializable {
             do {
                 cor = (isBlueAlliance ? 0 : 60) + randomGenerator.nextInt(40);
             } while (!coordinate.contains(cor) || (isBlueAlliance ? cor < 20 : cor >= 80)); // Ensure valid spy position
-            pawn.setCoordinateOfPawn(cor);
+            pawn.setPositionOfPawn(cor);
         } else {
             do {
                 cor = (isBlueAlliance ? 0 : 60) + randomGenerator.nextInt(40);
             } while (!coordinate.contains(cor)); // Find valid position
-            pawn.setCoordinateOfPawn(cor);
+            pawn.setPositionOfPawn(cor);
         }
         coordinate.remove(Integer.valueOf(cor)); // Remove selected coordinate
     }
@@ -156,7 +156,7 @@ public abstract class Player implements Serializable {
         do {
             cor = (isBlueAlliance ? 0 : 60) + randomGenerator.nextInt(40);
         } while (!coordinate.contains(cor)); // Find valid position
-        pawn.setCoordinateOfPawn(cor);
+        pawn.setPositionOfPawn(cor);
         coordinate.remove(Integer.valueOf(cor)); // Remove selected coordinate
     }    
 
@@ -169,14 +169,14 @@ public abstract class Player implements Serializable {
         } else {
             // In case of other panels, handle based on 'start' flag
             if (start) {
-                activePawns.get(pos).setCoordinateOfPawn(coordinate);
+                activePawns.get(pos).setPositionOfPawn(coordinate);
                 return;
             } else {
                 position = findPawnByCalculatedPosition(pos);
             }
         }
         if (position >= 0) {
-            activePawns.get(position).setCoordinateOfPawn(coordinate);
+            activePawns.get(position).setPositionOfPawn(coordinate);
         }
     }
     
@@ -246,7 +246,7 @@ public abstract class Player implements Serializable {
             if (tiles.get(m.getDestinationCoordinate()).isTileOccupied()) {
                 Pawn destinationPawn = tiles.get(m.getDestinationCoordinate()).getPawn();
                 if (m.getPawn().getValue() == 1 && destinationPawn.getValue() == 10) {
-                    if (destinationPawn.getSide()) {
+                    if (destinationPawn.isFlipped()) {
                         return m; // Return move if opponent's pawn (value 10) is on the same side
                     } else {
                         break; // Stop checking if pawn is on the opposite side

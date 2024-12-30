@@ -40,11 +40,11 @@ public class BoardUtilities {
      * @param coordinate is the number of the tile we want to check
      * @return 
      */
-    public static boolean isValidTileCordinate(final int coordinate) {
+    public static boolean isValidTileCoordinate(final int coordinate) {
         if (tileIsOnColumn(coordinate)) {
             return false; // if the tile is on a column then you cant move there
         } else {
-            return coordinate >= 0 && coordinate < NUM_TILES;   //check if the cordinate is valid
+            return coordinate >= 0 && coordinate < NUM_TILES;   //check if the coordinate is valid
         }
     }
 
