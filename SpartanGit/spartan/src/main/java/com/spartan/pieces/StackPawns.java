@@ -30,6 +30,7 @@ public class StackPawns {
         addFlag(alliance);
         addBombs(alliance);
         addNormalPawns(alliance);
+        addScouts(alliance);
     }
     
     private void addFlag(Alliance alliance) {
@@ -41,10 +42,15 @@ public class StackPawns {
             stack.add(new Bomb(-1, alliance, i + 1));
         }
     }
+
+    private void addScouts(Alliance alliance) {
+        for (int i = 0; i < 8; i++) {
+            stack.add(new Scout(-1, alliance, i + 8));
+        }
+    }
     
     private void addNormalPawns(Alliance alliance) {
         addPawns(alliance, 1, 7, 1);   // 1 spy
-        addPawns(alliance, 2, 8, 8);  // 8 scouts
         addPawns(alliance, 3, 16, 5); // 5 pawns of rank 3
         addPawns(alliance, 4, 21, 4); // 4 pawns of rank 4
         addPawns(alliance, 5, 25, 4); // 4 pawns of rank 5

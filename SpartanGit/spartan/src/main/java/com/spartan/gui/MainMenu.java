@@ -346,7 +346,7 @@ public class MainMenu extends javax.swing.JFrame {
     public void main() {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                music();
+                // music();
                 //        new MainMenu().setVisible(true);
             }
         });
